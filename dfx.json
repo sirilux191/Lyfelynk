@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "lyfelynkMVP_backend": {
+      "main": "src/lyfelynkMVP_backend/main.mo",
+      "type": "motoko"
+    },
+    "lyfelynkMVP_frontend": {
+      "dependencies": [
+        "lyfelynkMVP_backend"
+      ],
+      "source": [
+        "src/lyfelynkMVP_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "lyfelynkMVP_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
