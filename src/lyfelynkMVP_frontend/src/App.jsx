@@ -1,31 +1,46 @@
-import { useState } from 'react';
-import { lyfelynkMVP_backend } from 'declarations/lyfelynkMVP_backend';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import FirstPageContent from './onboarding/FirstPage';
+import RegisterPage1Content from './onboarding/RegisterPage/RegisterPage1';
+import RegisterPage2Content from './onboarding/RegisterPage/RegisterPage2';
+import RegisterPage3Content from './onboarding/RegisterPage/RegisterPage3';
+import NotFound from './NotFound';
+import { ThemeProvider } from './components/theme-provider';
+import RegisteredContent1 from './onboarding/RegisteredPage/RegisteredPage1';
+import RegisteredContent2 from './onboarding/RegisteredPage/RegisteredPage2';
+import RegisteredContent3 from './onboarding/RegisteredPage/RegisteredPage3';
+import AppRoute1 from './Health-User/AppRoute';
+import AppRoute2 from './Health-Professional/AppRoute';
+import AppRoute3 from './Health-Service/AppRoute';
 
-function App() {
-  const [greeting, setGreeting] = useState('');
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    lyfelynkMVP_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
-
+export default function App() {
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Navigate to="/Register" />} />
+          <Route path="/Register" element={<FirstPageContent/>} />
+          <Route path="/Register">
+            <Route path="Health-User" element={<RegisterPage1Content/>} />
+            <Route path="Health-User/verify" element={<RegisteredContent1/>} />
+
+            <Route path="Health-Professional" element={<RegisterPage2Content/>} />
+            <Route path="Health-Professional/verify" element={<RegisteredContent2/>} />
+
+            <Route path="Health-Service" element={<RegisterPage3Content/>} />
+            <Route path="Health-Service/verify" element={<RegisteredContent3/>} />
+          </Route>
+
+          <Route path="/Health-User/*" element={<AppRoute1/>} />
+          <Route path="/Health-Professional/*" element={<AppRoute2/>} />
+          <Route path="/Health-Service/*" element={<AppRoute3/>} />
+
+          <Route path="*" element={<NotFound/>} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 
-export default App;
+
