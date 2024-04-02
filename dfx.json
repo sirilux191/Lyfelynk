@@ -1,16 +1,17 @@
 {
   "canisters": {
+    "vetkd_system_api": {
+      "candid": "vetkd_system_api.did",
+      "type": "custom",
+      "wasm": "vetkd_system_api.wasm"
+    },
     "lyfelynkMVP_backend": {
       "main": "src/lyfelynkMVP_backend/main.mo",
       "type": "motoko"
     },
     "lyfelynkMVP_frontend": {
-      "dependencies": [
-        "lyfelynkMVP_backend"
-      ],
-      "source": [
-        "src/lyfelynkMVP_frontend/dist"
-      ],
+      "dependencies": ["lyfelynkMVP_backend"],
+      "source": ["src/lyfelynkMVP_frontend/dist"],
       "type": "assets",
       "workspace": "lyfelynkMVP_frontend"
     }
@@ -18,7 +19,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "output_env_file": ".env",
