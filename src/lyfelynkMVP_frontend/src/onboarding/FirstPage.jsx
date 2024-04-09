@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from 'lucide-react';
-import { User } from 'lucide-react';
-import { BriefcaseMedical } from 'lucide-react';
-import { Building } from 'lucide-react';
+import { ChevronRight } from "lucide-react";
+import { User } from "lucide-react";
+import { BriefcaseMedical } from "lucide-react";
+import { Building } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ConnectButton, ConnectDialog } from "@connect2ic/react";
+import "../connect2ic/connect2ic.css";
 
 export default function FirstPageContent() {
   return (
@@ -14,7 +16,8 @@ export default function FirstPageContent() {
             <img
               alt="Logo"
               className="h-6 w-6 md:h-10 md:w-10"
-              src="assets/LyfeLynk.png"/>
+              src="assets/LyfeLynk.png"
+            />
             <h1 className="text-2xl md:text-4xl font-bold ml-2">Lyfelynk</h1>
           </div>
           <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
@@ -23,42 +26,54 @@ export default function FirstPageContent() {
         <div className="flex-1 items-center max-w-md bg-white rounded-lg p-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-bold">Get Started</h2>
-            <Button>Connect</Button>
+            <div className="auth-section">
+              <ConnectButton />
+            </div>
+            <ConnectDialog />
           </div>
           <p className="text-sm text-gray-500 mb-4">Login/Register As</p>
           <div>
             <Link to="Health-User">
-              <Button className="flex justify-between items-center w-full border border-gray-300 p-3 rounded-md mb-2" variant="secondary">
+              <Button
+                className="flex justify-between items-center w-full border border-gray-300 p-3 rounded-md mb-2"
+                variant="secondary"
+              >
                 <div className="flex items-center">
-                  <User className="text-primary"/>
+                  <User className="text-primary" />
                   <span className="ml-2 font-bold">Health User</span>
                 </div>
-                <ChevronRight/>
+                <ChevronRight />
               </Button>
             </Link>
-          
+
             <Link to="Health-Professional">
-              <Button className="flex justify-between items-center w-full border border-gray-300 p-3 rounded-md mb-2" variant="secondary">
+              <Button
+                className="flex justify-between items-center w-full border border-gray-300 p-3 rounded-md mb-2"
+                variant="secondary"
+              >
                 <div className="flex items-center">
-                  <BriefcaseMedical className="text-primary"/>
+                  <BriefcaseMedical className="text-primary" />
                   <span className="ml-2 font-bold">Health Professional</span>
                 </div>
-                <ChevronRight/>
+                <ChevronRight />
               </Button>
             </Link>
 
             <Link to="Health-Service">
-              <Button className="flex justify-between items-center w-full border border-gray-300 p-3 rounded-md mb-2" variant="secondary">
+              <Button
+                className="flex justify-between items-center w-full border border-gray-300 p-3 rounded-md mb-2"
+                variant="secondary"
+              >
                 <div className="flex items-center">
-                  <Building className="text-primary"/>
+                  <Building className="text-primary" />
                   <span className="ml-2 font-bold">Health Service</span>
                 </div>
-                <ChevronRight/>
+                <ChevronRight />
               </Button>
             </Link>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

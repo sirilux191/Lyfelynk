@@ -5,7 +5,6 @@ import HashMap "mo:base/HashMap";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
@@ -16,7 +15,6 @@ import Source "mo:uuid/async/SourceV4";
 import UUID "mo:uuid/UUID";
 
 import Types "Types";
-import Hex "utils/Hex";
 
 actor LyfeLynk {
   let healthUserIDMap = Map.new<Principal, Types.HealthIDUser>();
@@ -37,7 +35,21 @@ actor LyfeLynk {
 
   let userListings = Map.new<Principal, [Types.Listing]>();
   //AUTHENTICATION FUNCTIONS
+  public shared ({ caller }) func whoami() : async Principal {
+    return caller;
+  };
 
+  public shared ({ caller }) func isRegistered() : async Text {
+    if (Map.has(healthFacilityIDMap, phash, caller)) {
+      return "Facility";
+    } else if (Map.has(healthProfessionalIDMap, phash, caller)) {
+      return "Professional";
+    } else if (Map.has(healthUserIDMap, phash, caller)) {
+      return "User";
+    } else {
+      return "Not Registered";
+    };
+  };
   //AUTHENTICATION FUNCTIONS
 
   // CRUD OPERATIONS USER ID
@@ -46,7 +58,9 @@ actor LyfeLynk {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous persons can't register, please login with wallet or internet identity");
     };
-
+    if (Map.has(healthUserIDMap, phash, caller) or Map.has(healthProfessionalIDMap, phash, caller) or Map.has(healthFacilityIDMap, phash, caller)) {
+      return #err("You are already registered in one of the categories. Cannot register as a Health User.");
+    };
     let g = Source.Source();
     let uuid = UUID.toText(await g.new());
     userRegistrationNumberCount := userRegistrationNumberCount +1;
@@ -64,7 +78,7 @@ actor LyfeLynk {
     Map.set(healthUserIDMap, phash, caller, tempID);
     Map.set(principalIDMap, phash, caller, Nat.toText(userRegistrationNumberCount));
     Map.set(idPrincipalMap, thash, Nat.toText(userRegistrationNumberCount), caller);
-    #ok("Your unique Health ID is:" # Nat.toText(userRegistrationNumberCount));
+    #ok(Nat.toText(userRegistrationNumberCount));
   };
 
   public shared ({ caller }) func readUser() : async Result.Result<Types.HealthIDUser, Text> {
@@ -134,6 +148,10 @@ actor LyfeLynk {
   public shared ({ caller }) func createProfessional(demoInfo : Blob, occupationInfo : Blob, certificationInfo : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous persons can't register, please login with wallet or internet identity");
+    };
+
+    if (Map.has(healthUserIDMap, phash, caller) or Map.has(healthProfessionalIDMap, phash, caller) or Map.has(healthFacilityIDMap, phash, caller)) {
+      return #err("You are already registered in one of the categories. Cannot register as a Health Professional.");
     };
 
     let g = Source.Source();
@@ -221,6 +239,10 @@ actor LyfeLynk {
   public shared ({ caller }) func createFacility(demoInfo : Blob, servicesOfferedInfo : Blob, licenseInfo : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous persons can't register, please login with wallet or internet identity");
+    };
+
+    if (Map.has(healthUserIDMap, phash, caller) or Map.has(healthProfessionalIDMap, phash, caller) or Map.has(healthFacilityIDMap, phash, caller)) {
+      return #err("You are already registered in one of the categories. Cannot register as a Health Facility.");
     };
 
     let g = Source.Source();
@@ -355,48 +377,56 @@ actor LyfeLynk {
             let dataAssetMap = Map.get(dataAssetStorage, thash, ownerID);
             switch (dataAssetMap) {
               case (?assetMap) {
-                let tempArray1 = Map.get(dataAccessPT, phash, userIDResult);
-                switch (tempArray1) {
-                  case (?array) {
-                    let buff = Buffer.fromArray<Text>(array);
-                    buff.add(userID #timestamp);
-                    Map.set(dataAccessPT, phash, userIDResult, Buffer.toArray(buff));
-                  };
-                  case (null) {
-                    Map.set(dataAccessPT, phash, userIDResult, [userID #timestamp]);
-                  };
-                };
-                let tempArray2 = Map.get(dataAccessTP, thash, userID #timestamp);
-                switch (tempArray2) {
-                  case (?array) {
-                    let buff = Buffer.fromArray<Principal>(array);
-                    buff.add(userIDResult);
-                    Map.set(dataAccessTP, thash, userID #timestamp, Buffer.toArray(buff));
-                  };
-                  case (null) {
-                    Map.set(dataAccessTP, thash, userID #timestamp, [userIDResult]);
-                  };
-                };
+                let docInAssetMap = assetMap.get(timestamp);
+                switch (docInAssetMap) {
+                  case (?doc) {
+                    let tempArray1 = Map.get(dataAccessPT, phash, userIDResult);
+                    switch (tempArray1) {
+                      case (?array) {
+                        let buff = Buffer.fromArray<Text>(array);
+                        buff.add(ownerID #timestamp);
+                        Map.set(dataAccessPT, phash, userIDResult, Buffer.toArray(buff));
+                      };
+                      case (null) {
+                        Map.set(dataAccessPT, phash, userIDResult, [ownerID #timestamp]);
+                      };
+                    };
+                    let tempArray2 = Map.get(dataAccessTP, thash, ownerID #timestamp);
+                    switch (tempArray2) {
+                      case (?array) {
+                        let buff = Buffer.fromArray<Principal>(array);
+                        buff.add(userIDResult);
+                        Map.set(dataAccessTP, thash, ownerID #timestamp, Buffer.toArray(buff));
+                      };
+                      case (null) {
+                        Map.set(dataAccessTP, thash, ownerID #timestamp, [userIDResult]);
+                      };
+                    };
 
-                // Add the shared activity information to the sharedFileList map
-                let sharedInfo : Types.sharedActivityInfo = {
-                  assetID = userID # timestamp;
-                  usedSharedTo = userID;
-                  time = Int.abs(Time.now());
-                };
+                    // Add the shared activity information to the sharedFileList map
+                    let sharedInfo : Types.sharedActivityInfo = {
+                      assetID = ownerID # timestamp;
+                      usedSharedTo = userID;
+                      time = Int.abs(Time.now());
+                    };
 
-                let ownerSharedFiles = Map.get(sharedFileList, phash, caller);
-                switch (ownerSharedFiles) {
-                  case (?files) {
-                    let buff = Buffer.fromArray<Types.sharedActivityInfo>(files);
-                    buff.add(sharedInfo);
-                    Map.set(sharedFileList, phash, caller, Buffer.toArray(buff));
+                    let ownerSharedFiles = Map.get(sharedFileList, phash, caller);
+                    switch (ownerSharedFiles) {
+                      case (?files) {
+                        let buff = Buffer.fromArray<Types.sharedActivityInfo>(files);
+                        buff.add(sharedInfo);
+                        Map.set(sharedFileList, phash, caller, Buffer.toArray(buff));
+                      };
+                      case (null) {
+                        Map.set(sharedFileList, phash, caller, [sharedInfo]);
+                      };
+                    };
+                    #ok("Sucessfully access given to user with ID " # userID);
                   };
                   case (null) {
-                    Map.set(sharedFileList, phash, caller, [sharedInfo]);
+                    #err("No Such Document Asset Found");
                   };
                 };
-                #ok("Sucessfully access given to user with ID " #userID);
               };
               case (null) {
                 #err("No data asset available");
@@ -435,7 +465,7 @@ actor LyfeLynk {
                   case (?array) {
                     let buff = Buffer.Buffer<Text>(array.size());
                     for (val in array.vals()) {
-                      if (val != userID #timestamp) {
+                      if (val != ownerID #timestamp) {
                         buff.add(val);
                       };
                     };
@@ -443,7 +473,7 @@ actor LyfeLynk {
                   };
                   case (null) {};
                 };
-                let tempArray2 = Map.get(dataAccessTP, thash, userID #timestamp);
+                let tempArray2 = Map.get(dataAccessTP, thash, ownerID #timestamp);
                 switch (tempArray2) {
                   case (?array) {
                     let buff = Buffer.Buffer<Principal>(array.size());
@@ -452,7 +482,7 @@ actor LyfeLynk {
                         buff.add(val);
                       };
                     };
-                    Map.set(dataAccessTP, thash, userID #timestamp, Buffer.toArray(buff));
+                    Map.set(dataAccessTP, thash, ownerID #timestamp, Buffer.toArray(buff));
                   };
                   case (null) {};
                 };
@@ -464,7 +494,7 @@ actor LyfeLynk {
                     let updatedFiles = Array.filter(
                       files,
                       func(item : Types.sharedActivityInfo) : Bool {
-                        item.assetID != userID # timestamp;
+                        item.assetID != ownerID # timestamp;
                       },
                     );
                     Map.set(sharedFileList, phash, caller, updatedFiles);
@@ -529,6 +559,56 @@ actor LyfeLynk {
         return #err("Caller is not a registered user.");
       };
     };
+  };
+
+  public shared query ({ caller }) func getSharedDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Anonymous principals cannot access shared data assets. Please log in with a wallet or internet identity.");
+    };
+
+    let sharedAssets = Buffer.Buffer<(Text, Types.DataAsset)>(0);
+
+    let sharedAssetIDs = Map.get(dataAccessPT, phash, caller);
+    switch (sharedAssetIDs) {
+      case (?assetIDs) {
+        for (assetID in assetIDs.vals()) {
+          let timestampLength = 10; // Assuming the timestamp length is fixed at 10 characters
+          let assetIDSize = Text.size(assetID);
+
+          if (assetIDSize <= timestampLength) {
+            // Handle invalid asset ID format
+            #err("invalid asset id");
+          };
+
+          let userIDSize = assetIDSize - timestampLength;
+          let userID = Text.join("", Text.tokens(assetID, #char('#'))[0..userIDSize - 1]);
+          let timestamp = Text.join("", Text.tokens(assetID, #char('#'))[userIDSize..]);
+
+          let dataAssetMap = Map.get(dataAssetStorage, thash, userID);
+          switch (dataAssetMap) {
+            case (?assetMap) {
+              let assetData = assetMap.get(timestamp);
+              switch (assetData) {
+                case (?asset) {
+                  sharedAssets.add((assetID, asset));
+                };
+                case (null) {};
+              };
+            };
+            case (null) {};
+          };
+        };
+      };
+      case (null) {
+        return #err("No shared data assets found for the user.");
+      };
+    };
+
+    if (sharedAssets.size() == 0) {
+      return #err("No shared data assets found for the user.");
+    };
+
+    return #ok(sharedAssets.toArray());
   };
 
   public shared ({ caller }) func addListing(
@@ -647,121 +727,93 @@ actor LyfeLynk {
     return #ok(Buffer.toArray(allListings));
   };
 
-  //VetKey Section
+  // //VetKey Section
 
-  type VETKD_SYSTEM_API = actor {
-    vetkd_public_key : ({
-      canister_id : ?Principal;
-      derivation_path : [Blob];
-      key_id : { curve : { #bls12_381 }; name : Text };
-    }) -> async ({ public_key : Blob });
-    vetkd_encrypted_key : ({
-      public_key_derivation_path : [Blob];
-      derivation_id : Blob;
-      key_id : { curve : { #bls12_381 }; name : Text };
-      encryption_public_key : Blob;
-    }) -> async ({ encrypted_key : Blob });
-  };
+  // type VETKD_SYSTEM_API = actor {
+  //   vetkd_public_key : ({
+  //     canister_id : ?Principal;
+  //     derivation_path : [Blob];
+  //     key_id : { curve : { #bls12_381 }; name : Text };
+  //   }) -> async ({ public_key : Blob });
+  //   vetkd_encrypted_key : ({
+  //     public_key_derivation_path : [Blob];
+  //     derivation_id : Blob;
+  //     key_id : { curve : { #bls12_381 }; name : Text };
+  //     encryption_public_key : Blob;
+  //   }) -> async ({ encrypted_key : Blob });
+  // };
 
-  let vetkd_system_api : VETKD_SYSTEM_API = actor ("s55qq-oqaaa-aaaaa-aaakq-cai");
+  // let vetkd_system_api : VETKD_SYSTEM_API = actor ("ck7s6-qyaaa-aaaag-ak43a-cai");
 
-  public shared ({ caller }) func symmetric_key_verification_key_for_profile() : async Text {
-    let { public_key } = await vetkd_system_api.vetkd_public_key({
-      canister_id = null;
-      derivation_path = Array.make(Text.encodeUtf8("profile_symmetric_key"));
-      key_id = { curve = #bls12_381; name = "test_key_1" };
-    });
-    Hex.encode(Blob.toArray(public_key));
-  };
+  // public shared ({ caller }) func symmetric_key_verification_key() : async Text {
+  //   if (Principal.isAnonymous(caller)) {
+  //     return ("Anonymous principals cannot delete listings. Please log in with a wallet or internet identity.");
+  //   };
+  //   let { public_key } = await vetkd_system_api.vetkd_public_key({
+  //     canister_id = null;
+  //     derivation_path = Array.make(Text.encodeUtf8("profile_symmetric_key"));
+  //     key_id = { curve = #bls12_381; name = "test_key_1" };
+  //   });
+  //   Hex.encode(Blob.toArray(public_key));
+  // };
 
-  public shared ({ caller }) func encrypted_symmetric_key_for_id(profile_id : Text, encryption_public_key : Blob) : async Result.Result<Text, Text> {
-    let principal = Map.get(idPrincipalMap, thash, profile_id);
-    switch (principal) {
-      case (?principal) {
-        if (principal != caller) {
-          return #err("Unauthorized access. The provided profile ID does not belong to the caller.");
-        };
+  // public shared ({ caller }) func encrypted_symmetric_key_for_id(profile_id : Text, encryption_public_key : Blob) : async Result.Result<Text, Text> {
+  //   if (Principal.isAnonymous(caller)) {
+  //     return #err("Anonymous principals cannot delete listings. Please log in with a wallet or internet identity.");
+  //   };
+  //   let principal = Map.get(idPrincipalMap, thash, profile_id);
+  //   switch (principal) {
+  //     case (?principal) {
+  //       if (principal != caller) {
+  //         return #err("Unauthorized access. The provided profile ID does not belong to the caller.");
+  //       };
 
-        let profile_data = if (profile_id.size() == 14) {
-          Map.get(healthUserIDMap, phash, caller);
-        } else if (profile_id.size() == 12) {
-          Map.get(healthProfessionalIDMap, phash, caller);
-        } else if (profile_id.size() == 10) {
-          Map.get(healthFacilityIDMap, phash, caller);
-        } else {
-          return #err("Invalid profile ID length.");
-        };
-        let idToDerive = Nat.fromText(profile_id);
-        switch (idToDerive) {
-          case (?idToDerive) {
-            switch (profile_data) {
-              case (?profile_data) {
-                let buf = Buffer.Buffer<Nat8>(32);
-                buf.append(Buffer.fromArray(natToBigEndianByteArray(16, idToDerive))); // fixed-size encoding
-                buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(profile_data.UUID))));
-                let derivation_id = Blob.fromArray(Buffer.toArray(buf));
+  //       let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
+  //         derivation_id = Text.encodeUtf8(Principal.toText(caller));
+  //         public_key_derivation_path = Array.make(Text.encodeUtf8("profile_symmetric_key"));
+  //         key_id = { curve = #bls12_381; name = "test_key_1" };
+  //         encryption_public_key;
+  //       });
 
-                let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
-                  derivation_id;
-                  public_key_derivation_path = Array.make(Text.encodeUtf8("profile_symmetric_key"));
-                  key_id = { curve = #bls12_381; name = "test_key_1" };
-                  encryption_public_key;
-                });
+  //       #ok(Hex.encode(Blob.toArray(encrypted_key)));
 
-                #ok(Hex.encode(Blob.toArray(encrypted_key)));
-              };
-              case (null) {
-                #err("Profile data not found for the provided profile ID.");
-              };
-            };
-          };
-          case (null) {
-            #err("Sorry you have to given proper profile ID");
-          };
-        };
+  //     };
+  //     case (null) {
+  //       #err("Invalid profile ID. No principal associated with the provided ID.");
+  //     };
+  //   };
+  // };
 
-      };
-      case (null) {
-        #err("Invalid profile ID. No principal associated with the provided ID.");
-      };
-    };
-  };
+  // public shared ({ caller }) func encrypted_symmetric_key_for_data(assetID : Text, encryption_public_key : Blob) : async Result.Result<Text, Text> {
+  //   if (Principal.isAnonymous(caller)) {
+  //     return #err("Anonymous principals cannot delete listings. Please log in with a wallet or internet identity.");
+  //   };
+  //   let accessList = Map.get(dataAccessTP, thash, assetID);
 
-  public shared ({ caller }) func encrypted_symmetric_key_for_data(assetID : Text, encryption_public_key : Blob) : async Result.Result<Text, Text> {
-    let accessList = Map.get(dataAccessTP, thash, assetID);
-    switch (accessList) {
-      case (?accessList) {
-        if (not Array.contains<Principal>(accessList, caller, Principal.equal)) {
-          return #err("Unauthorized access. The caller does not have access to the data asset.");
-        };
+  //   switch (accessList) {
+  //     case (?accessList) {
+  //       if (Array.find(accessList, func(p : Principal) : Bool { p == caller }) == null) {
+  //         return #err("Unauthorized access. The caller does not have access to the data asset.");
+  //       };
 
-        let buf = Buffer.Buffer<Nat8>(32);
-        buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(assetID))));
-        let derivation_id = Blob.fromArray(Buffer.toArray(buf));
+  //       let buf = Buffer.Buffer<Nat8>(32);
+  //       buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(assetID))));
+  //       let derivation_id = Blob.fromArray(Buffer.toArray(buf));
 
-        let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
-          derivation_id;
-          public_key_derivation_path = Array.make(Text.encodeUtf8("data_symmetric_key"));
-          key_id = { curve = #bls12_381; name = "test_key_1" };
-          encryption_public_key;
-        });
+  //       let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
+  //         derivation_id;
+  //         public_key_derivation_path = Array.make(Text.encodeUtf8("data_symmetric_key"));
+  //         key_id = { curve = #bls12_381; name = "test_key_1" };
+  //         encryption_public_key;
+  //       });
 
-        #ok(Hex.encode(Blob.toArray(encrypted_key)));
-      };
-      case (null) {
-        #err("Data asset not found or access not granted.");
-      };
-    };
-  };
-  //VetKey Section
+  //       #ok(Hex.encode(Blob.toArray(encrypted_key)));
+  //     };
+  //     case (null) {
+  //       #err("Data asset not found or access not granted.");
+  //     };
+  //   };
+  // };
+  // //VetKey Section
 
-  // Converts a nat to a fixed-size big-endian byte (Nat8) array
-  private func natToBigEndianByteArray(len : Nat, n : Nat) : [Nat8] {
-    let ith_byte = func(i : Nat) : Nat8 {
-      assert (i < len);
-      let shift : Nat = 8 * (len - 1 - i);
-      Nat8.fromIntWrap(n / 2 ** shift);
-    };
-    Array.tabulate<Nat8>(len, ith_byte);
-  };
 };
