@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CircleX } from 'lucide-react';
+import { CSVgenerate } from '@/Functions/CSVgenerate';
 
 const FileUpload = () => {
   const [file, setFile] = useState(null);
@@ -16,6 +17,7 @@ const FileUpload = () => {
   const [description, setDescription] = useState('');
   const [keywords, setKeywords] = useState('');
   const [author, setAuthor] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleFileInputChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -27,6 +29,8 @@ const FileUpload = () => {
           keywords: '',
           author: ''
         });
+        // Reset error message when a new file is selected
+        setErrorMessage('');
       }
     }
   };
@@ -46,6 +50,8 @@ const FileUpload = () => {
           keywords: '',
           author: ''
         });
+        // Reset error message when a new file is dropped
+        setErrorMessage('');
       }
     }
   };
@@ -55,11 +61,11 @@ const FileUpload = () => {
     const fileType = file.type.split("/")[1];
     const fileSizeMB = file.size / (1024 * 1024);
     if (!supportedFormats.includes(fileType)) {
-      alert("Unsupported file format. Please select a file with one of the supported formats: PDF, CSV, XML, JPG, JPEG.");
+      setErrorMessage("Unsupported file format. Please select a file with one of the supported formats: PDF, CSV, XML, JPG, JPEG.");
       return false;
     }
     if (fileSizeMB > 1.5) {
-      alert("File size is larger than 1.5 MB. Please select a smaller file.");
+      setErrorMessage("File size is larger than 1.5 MB. Please select a smaller file.");
       return false;
     }
     return true;
@@ -103,6 +109,7 @@ const FileUpload = () => {
     setDescription('');
     setKeywords('');
     setAuthor('');
+    setErrorMessage('');
   };
   
 
@@ -110,7 +117,7 @@ const FileUpload = () => {
     <div>
       <p className="text-sm mb-4 text-gray-500">Supported file formats include PDFs, CSVs, XML, JPGs, and JPEGs.</p>
       <div
-        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg ${isDraggingOver ? 'bg-gray-100' : ''}`}
+        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-600 rounded-lg ${isDraggingOver ? 'bg-gray-100' : ''}`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
@@ -127,6 +134,8 @@ const FileUpload = () => {
         <span className="text-sm text-gray-500">drag your file here</span>
       </div>
 
+      {errorMessage && <p className="text-sm mt-1 text-red-500">{errorMessage}</p>}
+
       {file && (
         <div>
           <Table>
@@ -142,34 +151,33 @@ const FileUpload = () => {
               <TableRow>
                 <TableCell>{file.file.name}</TableCell>
                 <TableCell>
-                  <div className=''>
+                  <div className='border rounded-sm'>
                     <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className=''>
-                    <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} />
+                  <div className='border rounded-sm'>
+                    <input type="text" className='py-3' value={keywords} onChange={(e) => setKeywords(e.target.value)} />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className=''>
-                    <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} />
+                  <div className='border rounded-sm'>
+                    <input type="text" className='py-3' value={author} onChange={(e) => setAuthor(e.target.value)} />
                   </div>
                 </TableCell>
 
                 <TableCell>
-                  <button onClick={handleRemoveFile} className="mt-4 p-2 bg-muted rounded-lg"> <CircleX/> </button>
+                  <button onClick={handleRemoveFile} className="p-2 bg-muted rounded-lg"> <CircleX/> </button>
                 </TableCell>
 
               </TableRow>
             </TableBody>
           </Table>
-
         </div>
       )}
 
       {file && (
-        <Button onClick={handleUpload} className="mt-2">Upload</Button>
+        <><Button onClick={handleUpload} className="my-2">Upload</Button><CSVgenerate /></>
       )}
     </div>
   );

@@ -28,6 +28,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SellDataFunc } from "@/Functions/SellData";
+import { ShareDataFunc } from "@/Functions/ShareData";
+import DownloadFile from "../../Functions/DownloadFile";
 
 const initialData = [
   { id: "doc1", name: "LoremIpsun", date: "Today 5:15 PM" },
@@ -64,9 +67,7 @@ const columns = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("name")}</div>
-    ),
+    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "date",
@@ -76,27 +77,25 @@ const columns = [
   {
     id: "share",
     header: "",
-    cell: () => (
-      <Button variant="outline">
-        Share
-      </Button>
-    ),
+    cell: () => <ShareDataFunc />,
     enableSorting: false,
     enableHiding: false,
   },
   {
     id: "sell",
     header: "",
-    cell: () => (
-      <Button>
-        Sell
-      </Button>
-    ),
+    cell: () => <SellDataFunc />,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    id: "download",
+    header: "",
+    cell: () => <DownloadFile />,
     enableSorting: false,
     enableHiding: false,
   },
 ];
-
 
 export function ShareSellTable() {
   const [sorting, setSorting] = useState([]);
@@ -128,15 +127,22 @@ export function ShareSellTable() {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter names..."
-          value={(table.getColumn("name") && table.getColumn("name").getFilterValue()) || ""}
+          value={
+            (table.getColumn("name") &&
+              table.getColumn("name").getFilterValue()) ||
+            ""
+          }
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm mr-2"
+          className="w-full mr-2"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="ml-auto"
+            >
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -156,7 +162,7 @@ export function ShareSellTable() {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -166,8 +172,7 @@ export function ShareSellTable() {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header
-                ) => {
+                {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -177,7 +182,7 @@ export function ShareSellTable() {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -237,4 +242,3 @@ export function ShareSellTable() {
     </div>
   );
 }
-

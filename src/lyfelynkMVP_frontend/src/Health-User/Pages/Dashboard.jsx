@@ -7,7 +7,12 @@ export default function DashboardContent() {
   return (
     <div>
       <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-foreground">Dashboard</h1>
+        {/* <h1 className="text-4xl font-bold text-foreground">Dashboard</h1> */}
+        <div class="w-fit bg-gradient-to-r from-slate-400 to-indigo-500 my-6 p-0.5 rounded-full ">
+          <div class="text-4xl font-bold py-2 px-4 bg-background rounded-full">
+            Dashboard
+          </div>
+        </div>
 
         <div className="py-6">
           <Carousel className="mx-auto">

@@ -164,7 +164,7 @@ export default function ProfileContent() {
               <div className="mt-6 grid grid-cols-2 gap-y-6 gap-x-4 ">
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="name"
                   >
                     Name
@@ -181,7 +181,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="dob"
                   >
                     Date of Birth
@@ -200,7 +200,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="gender"
                   >
                     Gender
@@ -211,7 +211,7 @@ export default function ProfileContent() {
                       onValueChange={setGender}
                     >
                       <SelectTrigger id="gender">
-                        <SelectValue placeholder="Select"></SelectValue>
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectItem value="male">Male</SelectItem>
@@ -224,7 +224,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="blood_type"
                   >
                     Blood Type
@@ -235,7 +235,7 @@ export default function ProfileContent() {
                       onValueChange={setBloodType}
                     >
                       <SelectTrigger id="blood_type">
-                        <SelectValue placeholder="Select"></SelectValue>
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectItem value="a+">A+</SelectItem>
@@ -253,7 +253,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="height"
                   >
                     Height
@@ -270,7 +270,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="country"
                   >
                     Country
@@ -287,7 +287,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="weight"
                   >
                     Weight
@@ -304,7 +304,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="state"
                   >
                     State
@@ -321,8 +321,8 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
-                    htmlFor="heart rate"
+                    className="block text-sm font-medium leading-5 text-foreground"
+                    htmlFor="heartRate"
                   >
                     Heart Rate
                   </label>
@@ -338,7 +338,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="pincode"
                   >
                     Pincode

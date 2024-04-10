@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import DownloadFile from "@/Functions/DownloadFile";
 
 const initialData = [
   { id: "doc1", name: "Loremipsum", datePurchased: "Today 5:15 PM" },
@@ -76,7 +77,7 @@ const columns = [
     id: "sell",
     header: "",
     cell: () => (
-      <button className="p-2 text-white bg-primary rounded-lg"> <Download/> </button>
+      <DownloadFile/>
     ),
     enableSorting: false,
     enableHiding: false,

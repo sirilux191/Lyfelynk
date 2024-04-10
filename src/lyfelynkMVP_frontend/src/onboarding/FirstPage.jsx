@@ -6,7 +6,6 @@ import { Building } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ConnectButton, ConnectDialog } from "@connect2ic/react";
 import "../connect2ic/connect2ic.css";
-
 export default function FirstPageContent() {
   return (
     <section className="px-6 flex justify-center items-center h-screen bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
@@ -15,17 +14,18 @@ export default function FirstPageContent() {
           <div className="flex items-center mb-4">
             <img
               alt="Logo"
-              className="h-6 w-6 md:h-10 md:w-10"
-              src="assets/LyfeLynk.png"
+              className="h-10 w-48"
+              src="assets/lyfelynk.png"
             />
-            <h1 className="text-2xl md:text-4xl font-bold ml-2">Lyfelynk</h1>
           </div>
           <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
         </div>
 
         <div className="flex-1 items-center max-w-md bg-white rounded-lg p-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-bold">Get Started</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-black">
+              Get Started
+            </h2>
             <div className="auth-section">
               <ConnectButton />
             </div>

@@ -17,12 +17,10 @@ import RegisteredContent3 from "./onboarding/RegisteredPage/RegisteredPage3";
 import AppRoute1 from "./Health-User/AppRoute";
 import AppRoute2 from "./Health-Professional/AppRoute";
 import AppRoute3 from "./Health-Service/AppRoute";
-
 //Connect2IC
 import { createClient } from "@connect2ic/core";
 import { defaultProviders } from "@connect2ic/core/providers";
 import { Connect2ICProvider } from "@connect2ic/react";
-
 //
 import * as lyfelynkMVP_backend from "../../declarations/lyfelynkMVP_backend";
 //

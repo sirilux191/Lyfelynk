@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCanister } from "@connect2ic/react";
 import { useState, useEffect } from "react";
-
 export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [professionalData, setProfessionalData] = useState(null);
@@ -176,7 +175,7 @@ export default function ProfileContent() {
               <div className="mt-6 grid grid-cols-2 gap-y-6 gap-x-4 ">
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="name"
                   >
                     Name
@@ -193,7 +192,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="dob"
                   >
                     Date of Birth
@@ -211,7 +210,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="gender"
                   >
                     Gender
@@ -235,7 +234,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="blood_type"
                   >
                     Blood Type
@@ -264,7 +263,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="height"
                   >
                     Height
@@ -281,7 +280,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="country"
                   >
                     Country
@@ -298,7 +297,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="weight"
                   >
                     Weight
@@ -315,7 +314,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="state"
                   >
                     State
@@ -332,14 +331,14 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
-                    htmlFor="weight"
+                    className="block text-sm font-medium leading-5 text-foreground"
+                    htmlFor="heartRate"
                   >
                     Heart Rate
                   </label>
                   <div className="mt-1">
                     <Input
-                      id="weight"
+                      id="heartRate"
                       placeholder="Heart Rate"
                       value={heartRate}
                       onChange={(e) => setHeartRate(e.target.value)}
@@ -349,7 +348,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="pincode"
                   >
                     Pincode
@@ -366,7 +365,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="occupation"
                   >
                     Occupation
@@ -383,7 +382,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="certificationid"
                   >
                     Certification Id
@@ -400,7 +399,7 @@ export default function ProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="company"
                   >
                     Company

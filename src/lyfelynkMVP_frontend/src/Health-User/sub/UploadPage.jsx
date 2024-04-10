@@ -5,6 +5,7 @@ import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChevronLeft } from "lucide-react";
 import FileUpload from "./file-upload"
+import { DatePicker } from "@/Functions/DatePicker"
 
 export default function UploadContent() {
   return (
@@ -41,7 +42,7 @@ export default function UploadContent() {
                       <label className="font-medium" htmlFor="date-of-checkup">
                         Date of Checkup
                       </label>
-                      <Input id="date" placeholder="dd/mm/yyyy" />
+                      <DatePicker/>
                     </div>
                     <div className="flex flex-col space-y-1.5">
                       <label className="font-medium" htmlFor="type-of-checkup">

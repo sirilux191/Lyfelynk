@@ -1,3 +1,4 @@
+import { DatePicker } from "@/Functions/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { useCanister } from "@connect2ic/react";
 //
 import { useState } from "react";
-
 export default function RegisterPage1Content() {
   // Connect2ic: Use the "lyfelynkMVP_backend" canister
 
@@ -80,10 +80,9 @@ export default function RegisterPage1Content() {
           <div className="flex items-center mb-4">
             <img
               alt="Logo"
-              className="h-6 w-6 md:h-10 md:w-10"
-              src="/assets/LyfeLynk.png"
+              className="h-10 w-48"
+              src="/assets/lyfelynk.png"
             />
-            <h1 className="text-2xl md:text-4xl font-bold ml-2">Lyfelynk</h1>
           </div>
           <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
         </div>
@@ -99,7 +98,7 @@ export default function RegisterPage1Content() {
           <div className="grid grid-cols-2 gap-4 py-4">
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="name"
               >
                 Name
@@ -116,24 +115,22 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="dob"
               >
                 Date of Birth
               </label>
               <div className="mt-1">
-                <Input
-                  placeholder="Date Of Birth"
-                  type="date"
+                <DatePicker
                   value={dob}
-                  onChange={(e) => setDob(e.target.value)}
+                  onValueChange={(value) => setDob(value)}
                 />
               </div>
             </div>
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="gender"
               >
                 Gender
@@ -157,7 +154,7 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="blood_type"
               >
                 Blood Type
@@ -186,7 +183,7 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="height"
               >
                 Height
@@ -203,7 +200,7 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="country"
               >
                 Country
@@ -220,7 +217,7 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="weight"
               >
                 Weight
@@ -237,7 +234,7 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="state"
               >
                 State
@@ -248,21 +245,20 @@ export default function RegisterPage1Content() {
                   placeholder="State"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  required
                 />
               </div>
             </div>
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
-                htmlFor="weight"
+                className="block text-sm font-medium leading-5 text-foreground"
+                htmlFor="heartRate"
               >
                 Heart Rate
               </label>
               <div className="mt-1">
                 <Input
-                  id="weight"
+                  id="heartRate"
                   placeholder="Heart Rate"
                   value={heartRate}
                   onChange={(e) => setHeartRate(e.target.value)}
@@ -272,7 +268,7 @@ export default function RegisterPage1Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="pincode"
               >
                 Pincode
@@ -283,7 +279,6 @@ export default function RegisterPage1Content() {
                   placeholder="Pincode"
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value)}
-                  required
                 />
               </div>
             </div>

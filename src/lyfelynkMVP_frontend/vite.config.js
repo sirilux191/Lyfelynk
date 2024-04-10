@@ -1,18 +1,16 @@
-import { fileURLToPath, URL } from "url";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import environment from "vite-plugin-environment";
-import dotenv from "dotenv";
-import path from "path"; // Add this import
-import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
-dotenv.config({ path: "../../.env" });
+import { fileURLToPath, URL } from 'url';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import environment from 'vite-plugin-environment';
+import dotenv from 'dotenv';
+import path from 'path'; // Add this import
+
+dotenv.config({ path: '../../.env' });
 
 export default defineConfig({
   build: {
     emptyOutDir: true,
   },
-
   optimizeDeps: {
     esbuildOptions: {
       define: {
@@ -32,8 +30,6 @@ export default defineConfig({
     react(),
     environment("all", { prefix: "CANISTER_" }),
     environment("all", { prefix: "DFX_" }),
-    wasm(),
-    topLevelAwait(),
   ],
   resolve: {
     alias: [
@@ -43,7 +39,9 @@ export default defineConfig({
       },
       {
         find: "declarations",
-        replacement: fileURLToPath(new URL("../declarations", import.meta.url)),
+        replacement: fileURLToPath(
+          new URL("../declarations", import.meta.url)
+        ),
       },
     ],
   },

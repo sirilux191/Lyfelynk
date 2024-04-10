@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  SelectValue,
+  SelectTrigger,
+  SelectItem,
+  SelectContent,
+  Select,
+} from "@/components/ui/select";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 // Connect2ic: Import Connect2ic library to interact with the backend canister
@@ -76,10 +83,9 @@ export default function RegisterPage3Content() {
           <div className="flex items-center mb-4">
             <img
               alt="Logo"
-              className="h-6 w-6 md:h-10 md:w-10"
-              src="/assets/LyfeLynk.png"
+              className="h-10 w-48"
+              src="/assets/lyfelynk.png"
             />
-            <h1 className="text-2xl md:text-4xl font-bold ml-2">Lyfelynk</h1>
           </div>
           <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
         </div>
@@ -95,7 +101,7 @@ export default function RegisterPage3Content() {
           <div className="grid grid-cols-2 gap-4 py-4">
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="facultyname"
               >
                 Faculty Name
@@ -112,7 +118,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="regId"
               >
                 Registeration ID
@@ -129,7 +135,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="country"
               >
                 Country
@@ -146,7 +152,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="state"
               >
                 State
@@ -163,7 +169,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="city"
               >
                 City
@@ -180,7 +186,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="pincode"
               >
                 Pincode
@@ -197,7 +203,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="service_name"
               >
                 Service Name
@@ -214,7 +220,7 @@ export default function RegisterPage3Content() {
 
             <div>
               <label
-                className="block text-sm font-medium leading-5 text-gray-700"
+                className="block text-sm font-medium leading-5 text-foreground"
                 htmlFor="service_name"
               >
                 Service Desc

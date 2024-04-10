@@ -13,6 +13,9 @@ export default function AppRoute1() {
   return (
     <div>
       <Navbar/>
+      <div class="circlePosition w-11/12 h-11/12 bg-[#367ed142] rounded-[100%] absolute -z-10 blur-[100px] flex justify-center items-center">
+        <div class="circle w-[17rem] h-[17rem] bg-[#5743ee42] rounded-[100%]" />
+      </div>
       <Routes>
         <Route path="/Home" element={<DashboardContent/>} />
         <Route path="/MyHealth" element={<MyHealthContent/>} />

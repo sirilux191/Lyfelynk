@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BuyDataFunc } from "@/Functions/BuyData";
 
 const initialData = [
   { id: "doc1", name: "Loremipsum", owner: "who.health.org", amount: "$316.00" },
@@ -83,7 +84,7 @@ const columns = [
     id: "sell",
     header: "",
     cell: () => (
-      <button className="p-2 text-white bg-primary rounded-lg"> <ShoppingCart/> </button>
+      <BuyDataFunc/>
 
     ),
     enableSorting: false,

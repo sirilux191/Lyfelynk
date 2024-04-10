@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCanister } from "@connect2ic/react";
 import { useState, useEffect } from "react";
 
-export default function FacilityProfileContent() {
+export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [facilityData, setFacilityData] = useState(null);
   const [facultyName, setFacultyName] = useState("");
@@ -120,7 +120,6 @@ export default function FacilityProfileContent() {
   if (!facilityData) {
     return <div>Loading...</div>;
   }
-
   return (
     <div>
       <div className="h-min py-8 px-4 sm:px-6 lg:px-8">
@@ -153,7 +152,7 @@ export default function FacilityProfileContent() {
               <div className="mt-6 grid grid-cols-2 gap-y-6 gap-x-4 ">
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="facultyname"
                   >
                     Faculty Name
@@ -170,15 +169,15 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="regId"
                   >
-                    Registration ID
+                    Registeration ID
                   </label>
                   <div className="mt-1">
                     <Input
                       id="regId"
-                      placeholder="Registration ID"
+                      placeholder="Registeration ID"
                       value={registrationId}
                       onChange={(e) => setRegistrationId(e.target.value)}
                     />
@@ -187,7 +186,7 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="country"
                   >
                     Country
@@ -204,7 +203,7 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="state"
                   >
                     State
@@ -221,7 +220,7 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="city"
                   >
                     City
@@ -238,7 +237,7 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="pincode"
                   >
                     Pincode
@@ -255,7 +254,7 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
+                    className="block text-sm font-medium leading-5 text-foreground"
                     htmlFor="service_name"
                   >
                     Service Name
@@ -272,15 +271,15 @@ export default function FacilityProfileContent() {
 
                 <div>
                   <label
-                    className="block text-sm font-medium leading-5 text-gray-700"
-                    htmlFor="service_desc"
+                    className="block text-sm font-medium leading-5 text-foreground"
+                    htmlFor="service_name"
                   >
-                    Service Description
+                    Service Desc
                   </label>
                   <div className="mt-1">
                     <Input
-                      id="service_desc"
-                      placeholder="Service Description"
+                      id="service_name"
+                      placeholder="Service Desc"
                       value={serviceDesc}
                       onChange={(e) => setServiceDesc(e.target.value)}
                     />

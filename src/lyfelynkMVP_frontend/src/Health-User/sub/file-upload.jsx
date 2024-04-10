@@ -9,8 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CircleX } from "lucide-react";
+import { CSVgenerate } from "@/Functions/CSVgenerate";
 import { useCanister } from "@connect2ic/react";
-
 const FileUpload = () => {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [file, setFile] = useState(null);
@@ -18,6 +18,7 @@ const FileUpload = () => {
   const [description, setDescription] = useState("");
   const [keywords, setKeywords] = useState("");
   const [category, setCategory] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleFileInputChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -29,6 +30,8 @@ const FileUpload = () => {
           keywords: "",
           category: "",
         });
+        // Reset error message when a new file is selected
+        setErrorMessage("");
       }
     }
   };
@@ -48,6 +51,8 @@ const FileUpload = () => {
           keywords: "",
           category: "",
         });
+        // Reset error message when a new file is dropped
+        setErrorMessage("");
       }
     }
   };
@@ -57,13 +62,15 @@ const FileUpload = () => {
     const fileType = file.type.split("/")[1];
     const fileSizeMB = file.size / (1024 * 1024);
     if (!supportedFormats.includes(fileType)) {
-      alert(
+      setErrorMessage(
         "Unsupported file format. Please select a file with one of the supported formats: PDF, CSV, XML, JPG, JPEG."
       );
       return false;
     }
     if (fileSizeMB > 1.5) {
-      alert("File size is larger than 1.5 MB. Please select a smaller file.");
+      setErrorMessage(
+        "File size is larger than 1.5 MB. Please select a smaller file."
+      );
       return false;
     }
     return true;
@@ -132,7 +139,8 @@ const FileUpload = () => {
     setFile(null);
     setDescription("");
     setKeywords("");
-    setCategory("");
+    setAuthor("");
+    setErrorMessage("");
   };
 
   return (
@@ -141,7 +149,7 @@ const FileUpload = () => {
         Supported file formats include PDFs, CSVs, XML, JPGs, and JPEGs.
       </p>
       <div
-        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg ${
+        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-600 rounded-lg ${
           isDraggingOver ? "bg-gray-100" : ""
         }`}
         onDrop={handleDrop}
@@ -165,6 +173,10 @@ const FileUpload = () => {
         <span className="text-sm text-gray-500">drag your file here</span>
       </div>
 
+      {errorMessage && (
+        <p className="text-sm mt-1 text-red-500">{errorMessage}</p>
+      )}
+
       {file && (
         <div>
           <Table>
@@ -173,14 +185,14 @@ const FileUpload = () => {
                 <TableHead>Title</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Keywords</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead>Author/Creator</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow>
                 <TableCell>{file.file.name}</TableCell>
                 <TableCell>
-                  <div className="">
+                  <div className="border rounded-sm">
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
@@ -188,18 +200,20 @@ const FileUpload = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="">
+                  <div className="border rounded-sm">
                     <input
                       type="text"
+                      className="py-3"
                       value={keywords}
                       onChange={(e) => setKeywords(e.target.value)}
                     />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="">
+                  <div className="border rounded-sm">
                     <input
                       type="text"
+                      className="py-3"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     />
@@ -209,7 +223,7 @@ const FileUpload = () => {
                 <TableCell>
                   <button
                     onClick={handleRemoveFile}
-                    className="mt-4 p-2 bg-muted rounded-lg"
+                    className="p-2 bg-muted rounded-lg"
                   >
                     {" "}
                     <CircleX />{" "}
@@ -222,12 +236,15 @@ const FileUpload = () => {
       )}
 
       {file && (
-        <Button
-          onClick={handleUpload}
-          className="mt-2"
-        >
-          Upload
-        </Button>
+        <>
+          <Button
+            onClick={handleUpload}
+            className="my-2"
+          >
+            Upload
+          </Button>
+          <CSVgenerate />
+        </>
       )}
     </div>
   );
