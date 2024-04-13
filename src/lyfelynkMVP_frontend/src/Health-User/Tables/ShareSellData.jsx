@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -10,9 +10,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
-
+import formatDate from "date-fns/format";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -31,69 +31,49 @@ import {
 import { SellDataFunc } from "@/Functions/SellData";
 import { ShareDataFunc } from "@/Functions/ShareData";
 import DownloadFile from "../../Functions/DownloadFile";
-
-const initialData = [
-  { id: "doc1", name: "LoremIpsun", date: "Today 5:15 PM" },
-  { id: "doc2", name: "Loremipsum", date: "Today 9:48 AM" },
-  { id: "doc3", name: "Loremissspm", date: "Yesterday" },
-  { id: "doc4", name: "Ipsum.lore", date: "Yesterday" },
-  { id: "doc5", name: "Sbceedfsjsj", date: "Monday" },
-  { id: "doc6", name: "SimpsonLorem", date: "Monday" },
-];
+import { useCanister } from "@connect2ic/react";
 
 const columns = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    accessorKey: "title",
+    header: "Title",
   },
   {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    accessorKey: "description",
+    header: "Description",
   },
   {
-    accessorKey: "date",
+    accessorKey: "timestamp",
     header: "Date",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("date")}</div>,
+    cell: ({ getValue }) => {
+      const date = new Date(getValue() / 1000000); // Convert nanoseconds to milliseconds
+      return formatDate(date, "yyyy-MM-dd HH:mm:ss");
+    },
   },
   {
-    id: "share",
-    header: "",
-    cell: () => <ShareDataFunc />,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    id: "sell",
-    header: "",
-    cell: () => <SellDataFunc />,
-    enableSorting: false,
-    enableHiding: false,
+    accessorKey: "format",
+    header: "File Format",
   },
   {
     id: "download",
     header: "",
-    cell: () => <DownloadFile />,
-    enableSorting: false,
-    enableHiding: false,
+    cell: ({ row }) => (
+      <DownloadFile
+        data={row.original.dataToDownload}
+        title={row.original.title}
+        format={row.original.format}
+      />
+    ),
+  },
+  {
+    id: "share",
+    header: "",
+    cell: ({ row }) => <ShareDataFunc assetID={row.original.timestamp} />,
+  },
+  {
+    id: "sell",
+    header: "",
+    cell: ({ row }) => <SellDataFunc assetID={row.original.timestamp} />,
   },
 ];
 
@@ -102,9 +82,35 @@ export function ShareSellTable() {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+  const [data, setData] = useState([]);
+  const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+
+  useEffect(() => {
+    const fetchUserDataAssets = async () => {
+      try {
+        const result = await lyfelynkMVP_backend.getUserDataAssets();
+        if (result.ok) {
+          const dataAssets = result.ok.map(([timestamp, asset]) => ({
+            timestamp,
+            title: asset.title,
+            description: asset.description,
+            format: asset.metadata.format,
+            dataToDownload: asset.data,
+          }));
+          setData(dataAssets);
+        } else {
+          console.error("Error fetching user data assets:", result.err);
+        }
+      } catch (error) {
+        console.error("Error fetching user data assets:", error);
+      }
+    };
+
+    fetchUserDataAssets();
+  }, [lyfelynkMVP_backend]);
 
   const table = useReactTable({
-    data: initialData,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

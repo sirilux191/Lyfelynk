@@ -11,10 +11,12 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+
 // Connect2ic: Import Connect2ic library to interact with the backend canister
 import { useCanister } from "@connect2ic/react";
 //
 import { useState } from "react";
+
 export default function RegisterPage1Content() {
   // Connect2ic: Use the "lyfelynkMVP_backend" canister
 

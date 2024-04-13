@@ -8,19 +8,104 @@ import {
   SelectContent,
   Select,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { ChevronLeft } from "lucide-react";
 import FileUpload from "./file-upload";
 import { DatePicker } from "@/Functions/DatePicker";
+import { jsPDF } from "jspdf";
+import { useState } from "react";
+import { useCanister } from "@connect2ic/react";
 
 export default function UploadContent() {
+  const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+  const [formData, setFormData] = useState({
+    dateOfCheckup: "",
+    typeOfCheckup: "",
+    healthcareProvider: "",
+    reasonForCheckup: "",
+    medicationName: "",
+    dosage: "",
+    frequency: "",
+    prescribingDoctor: "",
+  });
+  const [description, setDescription] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [category, setCategory] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSelectChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Generate PDF
+    const doc = new jsPDF();
+    let pdfContent = "";
+    for (const [key, value] of Object.entries(formData)) {
+      pdfContent += `${key}: ${value}\n\n`;
+    }
+    doc.text(pdfContent, 10, 10);
+
+    // Save PDF as a file
+    const pdfBlob = doc.output("blob");
+    const pdfFile = new File([pdfBlob], "generated.pdf", {
+      type: "application/pdf",
+    });
+
+    const fileReader = new FileReader();
+    fileReader.onload = async () => {
+      const arrayBuffer = fileReader.result;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      console.log(uint8Array);
+      const metadata = {
+        category: category,
+        tags: [keywords],
+        format: pdfFile.type,
+      };
+
+      const dataAsset = {
+        title: pdfFile.name,
+        description: description,
+        data: Object.values(uint8Array),
+        metadata: metadata,
+      };
+
+      const result = await lyfelynkMVP_backend.linkHealthData(dataAsset);
+
+      Object.keys(result).forEach((key) => {
+        if (key === "err") {
+          alert(result[key]);
+        }
+        if (key === "ok") {
+          console.log(result[key]);
+          alert("File uploaded successfully");
+        }
+      });
+    };
+    fileReader.readAsArrayBuffer(pdfFile);
+  };
+
   return (
     <div>
       <div className="flex flex-col items-center justify-center p-8">
         <div className="flex items-center justify-between w-full">
-          <Link to="/Health-Service/MyHealth">
+          <Link to="/Health-User/MyHealth">
             <div className="flex text-foreground">
-              <ChevronLeft className=" mr-2" />
+              <ChevronLeft className="mr-2" />
               Back
             </div>
           </Link>
@@ -54,7 +139,10 @@ export default function UploadContent() {
                 Fill the form out carefully and make sure the information is
                 true to your knowledge.
               </p>
-              <form className="space-y-6">
+              <form
+                className="space-y-6"
+                onSubmit={handleSubmit}
+              >
                 <div>
                   <h2 className="text-xl font-semibold">
                     Health Checkup Details
@@ -67,7 +155,11 @@ export default function UploadContent() {
                       >
                         Date of Checkup
                       </label>
-                      <DatePicker />
+                      <DatePicker
+                        id="date-of-checkup"
+                        value={formData.dateOfCheckup}
+                        onChange={handleChange}
+                      />
                     </div>
                     <div className="flex flex-col space-y-1.5">
                       <label
@@ -76,8 +168,14 @@ export default function UploadContent() {
                       >
                         Type of Checkup
                       </label>
-                      <Select>
-                        <SelectTrigger id="type-of-checkup">
+                      <Select
+                        id="type-of-checkup"
+                        value={formData.typeOfCheckup}
+                        onValueChange={(value) =>
+                          handleSelectChange("typeOfCheckup", value)
+                        }
+                      >
+                        <SelectTrigger>
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent position="popper">
@@ -103,8 +201,10 @@ export default function UploadContent() {
                         Healthcare Provider/Facility Name
                       </label>
                       <Input
-                        id="healthcare-provider"
+                        id="healthcareProvider"
                         placeholder="Enter name"
+                        value={formData.healthcareProvider}
+                        onChange={handleChange}
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
@@ -114,8 +214,14 @@ export default function UploadContent() {
                       >
                         Reason for Checkup
                       </label>
-                      <Select>
-                        <SelectTrigger id="reason-for-checkup">
+                      <Select
+                        id="reason-for-checkup"
+                        value={formData.reasonForCheckup}
+                        onValueChange={(value) =>
+                          handleSelectChange("reasonForCheckup", value)
+                        }
+                      >
+                        <SelectTrigger>
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent position="popper">
@@ -145,8 +251,10 @@ export default function UploadContent() {
                         Medication Name(s)
                       </label>
                       <Input
-                        id="medication-name"
+                        id="medicationName"
                         placeholder="Enter medication name"
+                        value={formData.medicationName}
+                        onChange={handleChange}
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
@@ -159,6 +267,8 @@ export default function UploadContent() {
                       <Input
                         id="dosage"
                         placeholder="Enter dosage"
+                        value={formData.dosage}
+                        onChange={handleChange}
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
@@ -171,6 +281,8 @@ export default function UploadContent() {
                       <Input
                         id="frequency"
                         placeholder="Enter frequency"
+                        value={formData.frequency}
+                        onChange={handleChange}
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
@@ -181,13 +293,60 @@ export default function UploadContent() {
                         Prescribing Doctor
                       </label>
                       <Input
-                        id="prescribing-doctor"
+                        id="prescribingDoctor"
                         placeholder="Enter doctor's name"
+                        value={formData.prescribingDoctor}
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
                 </div>
-                <Button>Submit</Button>
+                <div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Keywords</TableHead>
+                        <TableHead>Category</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>{"Report Generated"}</TableCell>
+                        <TableCell>
+                          <div className="border rounded-sm">
+                            <textarea
+                              value={description}
+                              onChange={(e) => setDescription(e.target.value)}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="border rounded-sm">
+                            <input
+                              type="text"
+                              className="py-3"
+                              value={keywords}
+                              onChange={(e) => setKeywords(e.target.value)}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="border rounded-sm">
+                            <input
+                              type="text"
+                              className="py-3"
+                              value={category}
+                              onChange={(e) => setCategory(e.target.value)}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+                <Button type="submit">Submit</Button>
               </form>
             </TabsContent>
           </Tabs>

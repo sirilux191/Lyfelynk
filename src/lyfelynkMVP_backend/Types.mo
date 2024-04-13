@@ -3,6 +3,11 @@ import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 module Types {
 
+    public type SharedType = {
+        #Sold;
+        #Shared;
+    };
+
     public type Metadata = {
         category : Text;
         tags : [Text];
@@ -54,6 +59,7 @@ module Types {
         assetID : Text;
         usedSharedTo : Text;
         time : Nat;
+        sharedType : SharedType;
     };
 
     public type Listing = {
@@ -61,7 +67,7 @@ module Types {
         description : Text;
         price : Nat;
         category : Text;
-        seller : Principal;
+        seller : Text;
         assetID : Text;
     };
 };

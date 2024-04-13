@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
-
+import formatDate from "date-fns/format";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -26,72 +26,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const HealthData = [
-  {
-    id: "INV001",
-    status: "Uploaded",
-    dateUploaded: "Today 5:15 PM",
-  },
-  {
-    id: "INV002",
-    status: "Shared",
-    dateUploaded: "Today 5:48 AM",
-  },
-  {
-    id: "INV003",
-    status: "Uploaded",
-    dateUploaded: "Yesterday",
-  },
-  {
-    id: "INV004",
-    status: "Shared",
-    dateUploaded: "Yesterday",
-  },
-  {
-    id: "INV005",
-    status: "Shared",
-    dateUploaded: "Monday",
-  },
-];
+import { useCanister } from "@connect2ic/react";
 
 const columns = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    accessorKey: "assetID",
+    header: "Asset ID",
   },
   {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    accessorKey: "usedSharedTo",
+    header: "User Shared To",
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <div>{row.getValue("status")}</div>,
+    accessorKey: "time",
+    header: "Date",
+    cell: ({ getValue }) => {
+      const date = new Date(Number(getValue()) / 1000000);
+      return formatDate(date, "yyyy-MM-dd HH:mm:ss");
+    },
   },
   {
-    accessorKey: "dateUploaded",
-    header: "Date Uploaded",
-    cell: ({ row }) => <div>{row.getValue("dateUploaded")}</div>,
+    accessorKey: "sharedType",
+    header: "Sharing Type",
+    cell: ({ getValue }) => {
+      return Object.keys(getValue())[0];
+    },
   },
 ];
 
@@ -100,9 +59,29 @@ function RecentActivityTable() {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+  const [data, setData] = useState([]);
+  const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+
+  useEffect(() => {
+    const fetchSharedFilesList = async () => {
+      try {
+        const result = await lyfelynkMVP_backend.getSharedFileList();
+        console.log(result);
+        if (result.ok) {
+          setData(result.ok);
+        } else {
+          console.error("Error fetching shared files list:", result.err);
+        }
+      } catch (error) {
+        console.error("Error fetching shared files list:", error);
+      }
+    };
+
+    fetchSharedFilesList();
+  }, [lyfelynkMVP_backend]);
 
   const table = useReactTable({
-    data: HealthData,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -125,15 +104,22 @@ function RecentActivityTable() {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter documents..."
-          value={(table.getColumn("id") && table.getColumn("id").getFilterValue()) || ""}
+          value={
+            (table.getColumn("assetID") &&
+              table.getColumn("assetID").getFilterValue()) ||
+            ""
+          }
           onChange={(event) =>
-            table.getColumn("id") && table.getColumn("id").setFilterValue(event.target.value)
+            table.getColumn("assetID")?.setFilterValue(event.target.value)
           }
           className="max-w-4xl mr-2"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="ml-auto"
+            >
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>

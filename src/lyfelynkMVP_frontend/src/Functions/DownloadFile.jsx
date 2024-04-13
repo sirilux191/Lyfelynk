@@ -1,19 +1,34 @@
-import { Download } from 'lucide-react';
-import React from 'react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
-const DownloadFile = () => {
-  const handleDownload = () => {
-    // Dummy download function
-    console.log('File downloaded!');
+const DownloadFile = ({ data, format, title }) => {
+  function downloadData(file) {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.name;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const downloadFile = async () => {
+    const retrievedFileBlob = new Blob([new Uint8Array(data)], {
+      type: format,
+    });
+    const retrievedFile = new File([retrievedFileBlob], title, {
+      type: format,
+    });
+    downloadData(retrievedFile);
   };
 
   return (
-      <button
-        className=" p-2 text-white bg-primary rounded-lg"
-        onClick={handleDownload}
-      >
-        <Download/>
-      </button>
+    <Button
+      variant="ghost"
+      onClick={downloadFile}
+    >
+      <Download className="h-4 w-4" />
+    </Button>
   );
 };
 

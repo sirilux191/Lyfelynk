@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ShoppingCart } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,68 +27,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BuyDataFunc } from "@/Functions/BuyData";
-
-const initialData = [
-  { id: "doc1", name: "Loremipsum", owner: "who.health.org", amount: "$316.00" },
-  { id: "doc2", name: "Loremipsum", owner: "who.health.org", amount: "$316.00" },
-  { id: "doc3", name: "Loremipsum", owner: "who.health.org", amount: "$316.00" },
-  { id: "doc4", name: "Loremipsum", owner: "who.health.org", amount: "$316.00" },
-  { id: "doc5", name: "Loremipsum", owner: "who.health.org", amount: "$316.00" },
-];
+import { useCanister } from "@connect2ic/react";
 
 const columns = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+    accessorKey: "title",
+    header: "Title",
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+    cell: ({ getValue }) => {
+      return getValue() + " LYF";
+    },
+  },
+  {
+    id: "buy",
+    header: "Purchase",
+    cell: ({ row }) => (
+      <BuyDataFunc
+        listingID={row.original.assetID}
+        seller={row.original.seller}
       />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "owner",
-    header: "Owner",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("owner")}</div>
-    ),
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("amount")}</div>
-    ),
-  },
-  {
-    id: "sell",
-    header: "",
-    cell: () => (
-      <BuyDataFunc/>
-
-    ),
-    enableSorting: false,
-    enableHiding: false,
   },
 ];
 
@@ -97,9 +66,28 @@ function DataOnSaleTable() {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+  const [data, setData] = useState([]);
+  const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const result = await lyfelynkMVP_backend.getAllListings();
+        if (result.ok) {
+          setData(result.ok);
+        } else {
+          console.error("Error fetching listings:", result.err);
+        }
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+      }
+    };
+
+    fetchListings();
+  }, [lyfelynkMVP_backend]);
 
   const table = useReactTable({
-    data: initialData,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -122,15 +110,22 @@ function DataOnSaleTable() {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter names..."
-          value={(table.getColumn("name") && table.getColumn("name").getFilterValue()) || ""}
+          value={
+            (table.getColumn("name") &&
+              table.getColumn("name").getFilterValue()) ||
+            ""
+          }
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="mr-2"
+          className="w-full mr-2"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="ml-auto"
+            >
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -150,7 +145,7 @@ function DataOnSaleTable() {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -170,7 +165,7 @@ function DataOnSaleTable() {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -232,4 +227,3 @@ function DataOnSaleTable() {
 }
 
 export default DataOnSaleTable;
-

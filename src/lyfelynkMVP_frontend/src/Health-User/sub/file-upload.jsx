@@ -105,36 +105,40 @@ const FileUpload = () => {
 
   const handleUpload = async () => {
     if (file) {
-      const fileData = await file.file.arrayBuffer();
-      const fileDataArray = [...new Uint8Array(fileData)];
+      // Convert the file into ArrayBuffer
+      const fileReader = new FileReader();
+      fileReader.onload = async () => {
+        const arrayBuffer = fileReader.result;
+        const uint8Array = new Uint8Array(arrayBuffer);
+        console.log(uint8Array);
+        const metadata = {
+          category: category,
+          tags: [keywords],
+          format: file.file.type,
+        };
 
-      const metadata = {
-        category: category,
-        tags: [keywords],
-        format: file.file.type,
+        const dataAsset = {
+          title: file.file.name,
+          description: description,
+          data: Object.values(uint8Array),
+          metadata: metadata,
+        };
+
+        const result = await lyfelynkMVP_backend.linkHealthData(dataAsset);
+
+        Object.keys(result).forEach((key) => {
+          if (key === "err") {
+            alert(result[key]);
+          }
+          if (key === "ok") {
+            console.log(result[key]);
+            alert("File uploaded successfully");
+          }
+        });
       };
-
-      const dataAsset = {
-        title: file.file.name,
-        description: description,
-        data: fileDataArray,
-        metadata: metadata,
-      };
-
-      const result = await lyfelynkMVP_backend.linkHealthData(dataAsset);
-
-      Object.keys(result).forEach((key) => {
-        if (key === "err") {
-          alert(result[key]);
-        }
-        if (key === "ok") {
-          console.log(result[key]);
-          alert("File uploaded successfully");
-        }
-      });
+      fileReader.readAsArrayBuffer(file.file);
     }
   };
-
   const handleRemoveFile = () => {
     setFile(null);
     setDescription("");
@@ -185,7 +189,7 @@ const FileUpload = () => {
                 <TableHead>Title</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Keywords</TableHead>
-                <TableHead>Author/Creator</TableHead>
+                <TableHead>Category</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
