@@ -70,4 +70,13 @@ module Types {
         seller : Text;
         assetID : Text;
     };
+
+    public type purchasedInfo = {
+        title : Text;
+        listingID : Text;
+        price : Nat;
+        assetID : Text;
+        time : Nat;
+        seller : Text;
+    };
 };

@@ -30,12 +30,14 @@ actor LyfeLynk {
   let dataAccessTP = Map.new<Text, [Principal]>(); //AssetIDUnique <---> user
   let dataAccessPT = Map.new<Principal, [Text]>(); //User <---> AssetIDUnique
   let sharedFileList = Map.new<Principal, [Types.sharedActivityInfo]>();
+  let purchasedDataAssetList = Map.new<Principal, [Types.purchasedInfo]>();
 
   stable var userRegistrationNumberCount : Nat = 10000000000000;
   stable var profRegistrationNumberCount : Nat = 100000000000;
   stable var facilityRegistrationNumberCount : Nat = 1000000000;
 
   let userListings = Map.new<Principal, HashMap.HashMap<Text, Types.Listing>>();
+
   //AUTHENTICATION FUNCTIONS
   public shared ({ caller }) func whoami() : async Principal {
     return caller;
@@ -875,6 +877,27 @@ actor LyfeLynk {
                           };
                         };
 
+                        let purchasedInformation : Types.purchasedInfo = {
+                          title = listing.title;
+                          listingID = listingID;
+                          price = listing.price;
+                          assetID = uniqueID;
+                          time = Int.abs(Time.now());
+                          seller = sellerID;
+                        };
+
+                        let buyerPurchasedList = Map.get(purchasedDataAssetList, phash, caller);
+                        switch (buyerPurchasedList) {
+                          case (?purchasedList) {
+                            let buff = Buffer.fromArray<Types.purchasedInfo>(purchasedList);
+                            buff.add(purchasedInformation);
+                            Map.set(purchasedDataAssetList, phash, caller, Buffer.toArray(buff));
+                          };
+                          case (null) {
+                            Map.set(purchasedDataAssetList, phash, caller, [purchasedInformation]);
+                          };
+                        };
+
                         #ok("Listing purchased successfully. Access granted to the buyer.");
                       };
                       case (null) {
@@ -902,5 +925,47 @@ actor LyfeLynk {
       };
     };
   };
+  public shared query ({ caller }) func getPurchasedDataAssets() : async Result.Result<[(Types.DataAsset, Types.purchasedInfo)], Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
+    };
 
+    let purchasedInfoList = Buffer.Buffer<(Types.DataAsset, Types.purchasedInfo)>(0);
+
+    let purchasedList = Map.get(purchasedDataAssetList, phash, caller);
+    switch (purchasedList) {
+      case (?list) {
+        for (purchasedInformation in list.vals()) {
+          let parts = Text.split(purchasedInformation.assetID, #text("-"));
+          switch (parts.next(), parts.next(), parts.next()) {
+            case (?ownerID, ?timestamp, null) {
+              let dataAssetMap = Map.get(dataAssetStorage, thash, ownerID);
+              switch (dataAssetMap) {
+                case (?assetMap) {
+                  let dataAsset = assetMap.get(timestamp);
+                  switch (dataAsset) {
+                    case (?asset) {
+                      purchasedInfoList.add((asset, purchasedInformation));
+                    };
+                    case (null) {};
+                  };
+                };
+                case (null) {};
+              };
+            };
+            case (_) {};
+          };
+        };
+      };
+      case (null) {
+        return #err("No purchased data assets found for the caller.");
+      };
+    };
+
+    if (purchasedInfoList.size() == 0) {
+      return #err("No purchased data assets found for the caller.");
+    };
+
+    return #ok(Buffer.toArray(purchasedInfoList));
+  };
 };
