@@ -24,10 +24,10 @@ const DownloadFile = ({ data, format, title }) => {
 
   return (
     <Button
-      variant="ghost"
+      className="p-2 text-white"
       onClick={downloadFile}
     >
-      <Download className="h-4 w-4" />
+      <Download/>
     </Button>
   );
 };
