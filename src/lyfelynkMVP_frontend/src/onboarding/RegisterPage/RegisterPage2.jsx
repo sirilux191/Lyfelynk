@@ -1,4 +1,3 @@
-import { DatePicker } from "@/Functions/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -135,7 +134,9 @@ export default function RegisterPage2Content() {
                 Date of Birth
               </label>
               <div className="mt-1">
-                <DatePicker
+                <Input
+                  id="dob"
+                  type="date"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
                 />
