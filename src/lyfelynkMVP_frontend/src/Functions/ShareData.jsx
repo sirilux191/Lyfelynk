@@ -16,6 +16,8 @@ import { Label } from "@/components/ui/label";
 
 export function ShareDataFunc({ assetID }) {
   const [userId, setUserId] = useState("");
+  const [open, setOpen] = useState(false); // Managing dialog's open state
+
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
   const handleShare = async () => {
@@ -23,6 +25,7 @@ export function ShareDataFunc({ assetID }) {
       const result = await lyfelynkMVP_backend.grantDataAccess(userId, assetID);
       if (result.ok) {
         alert("Access granted successfully");
+        setOpen(false); //dialog closes
       } else {
         alert("Error granting access: " + result.err);
       }
@@ -32,9 +35,9 @@ export function ShareDataFunc({ assetID }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Share</Button>
+        <Button variant="outline" onClick={() => setOpen(true)}>Share</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -61,9 +64,7 @@ export function ShareDataFunc({ assetID }) {
           </div>
         </div>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button onClick={handleShare}>Send</Button>
-          </DialogClose>
+          <Button onClick={handleShare}>Send</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

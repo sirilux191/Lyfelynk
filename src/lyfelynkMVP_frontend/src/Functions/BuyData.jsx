@@ -14,6 +14,8 @@ import { ShoppingCart } from "lucide-react";
 import { useCanister } from "@connect2ic/react";
 
 export function BuyDataFunc({ listingID, seller }) {
+  const [open, setOpen] = useState(false); // Managing dialog's open state
+
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
   const handleConfirmPurchase = async () => {
@@ -26,6 +28,7 @@ export function BuyDataFunc({ listingID, seller }) {
       );
       if (result.ok) {
         alert("Purchase successful:", result.ok);
+        setOpen(false); //dialog closes
       } else {
         alert("Purchase failed:", result.err);
       }
@@ -35,9 +38,9 @@ export function BuyDataFunc({ listingID, seller }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="p-2 text-white">
+        <Button className="p-2 text-white" onClick={() => setOpen(true)}> 
           <ShoppingCart />
         </Button>
       </DialogTrigger>
@@ -49,9 +52,7 @@ export function BuyDataFunc({ listingID, seller }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button onClick={handleConfirmPurchase}>Yes</Button>
-          </DialogClose>
+          <Button onClick={handleConfirmPurchase}>Yes</Button>
           <DialogClose asChild>
             <Button variant="secondary">Close</Button>
           </DialogClose>

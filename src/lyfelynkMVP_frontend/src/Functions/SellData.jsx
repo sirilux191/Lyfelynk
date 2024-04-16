@@ -19,6 +19,7 @@ export function SellDataFunc({ assetID }) {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [open, setOpen] = useState(false); // Managing dialog's open state
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
   const handleSaveChanges = async () => {
@@ -32,6 +33,7 @@ export function SellDataFunc({ assetID }) {
       );
       if (result.ok) {
         alert("Listing added successfully");
+        setOpen(false); //dialog closes
       } else {
         alert("Error adding listing: " + result.err);
       }
@@ -41,9 +43,9 @@ export function SellDataFunc({ assetID }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Sell</Button>
+        <Button onClick={() => setOpen(true)}>Sell</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -112,9 +114,7 @@ export function SellDataFunc({ assetID }) {
           </div>
         </div>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button onClick={handleSaveChanges}>Confirm</Button>
-          </DialogClose>
+          <Button onClick={handleSaveChanges}>Confirm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
