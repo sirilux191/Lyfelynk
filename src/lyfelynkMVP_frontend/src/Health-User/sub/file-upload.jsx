@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from '@/components/ui/textarea';
 import { CircleX } from "lucide-react";
 import { CSVgenerate } from "@/Functions/CSVgenerate";
 import { useCanister } from "@connect2ic/react";
@@ -197,7 +198,7 @@ const FileUpload = () => {
                 <TableCell>{file.file.name}</TableCell>
                 <TableCell>
                   <div className="border rounded-sm">
-                    <textarea
+                    <Textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                     />
@@ -205,7 +206,7 @@ const FileUpload = () => {
                 </TableCell>
                 <TableCell>
                   <div className="border rounded-sm">
-                    <input
+                    <Textarea
                       type="text"
                       className="py-3"
                       value={keywords}
@@ -215,7 +216,7 @@ const FileUpload = () => {
                 </TableCell>
                 <TableCell>
                   <div className="border rounded-sm">
-                    <input
+                    <Textarea
                       type="text"
                       className="py-3"
                       value={category}
