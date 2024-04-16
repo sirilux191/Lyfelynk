@@ -100,7 +100,7 @@ export default function UploadContent() {
   };
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col items-center justify-center p-8">
         <div className="flex items-center justify-between w-full">
           <Link to="/Health-User/MyHealth">
