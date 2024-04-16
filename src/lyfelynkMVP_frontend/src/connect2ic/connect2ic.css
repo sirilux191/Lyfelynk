@@ -147,14 +147,15 @@
 }
 
 .connect-button {
-  font-size: 18px;
-  background: rgb(35 35 39);
+  font-size: 14px;
+  font-weight: bold;
+  background: rgb(37 99 235);
   color: white;
   border: none;
   padding: 10px 20px;
   display: flex;
   align-items: center;
-  border-radius: 40px;
+  border-radius: 20px;
   cursor: pointer;
 }
 
