@@ -56,20 +56,7 @@ export default function DashboardContent() {
 
         <section className="py-4">
           <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-            <Card>
-              <div className="py-8 px-4">
-                <h1 className="text-3xl font-semibold mb-2 text-center">Recent Activities</h1>
-                <p className="text-sm text-gray-600 mb-6 text-center">Recently shared or uploaded files on LyfeLynk.</p>
-                <RecentActivityTable />
-              </div>
-            </Card>
-            <Card>
-              <div className="py-8 px-4">
-                <h1 className="text-3xl font-semibold mb-2 text-center">Data Purchased</h1>
-                <p className="text-sm text-gray-600 mb-6 text-center">Health data purchased on LyfeLynk.</p>
-                <DataPurchasedTable/>
-              </div>
-            </Card>
+
           </div>
         </section>
       </div>
