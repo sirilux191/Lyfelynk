@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft } from "lucide-react";
 import FileUpload from "./file-upload";
 import { DatePicker } from "@/Functions/DatePicker";
@@ -316,7 +316,7 @@ export default function UploadContent() {
                         <TableCell>{"Report Generated"}</TableCell>
                         <TableCell>
                           <div className="border rounded-sm">
-                            <textarea
+                            <Textarea
                               value={description}
                               onChange={(e) => setDescription(e.target.value)}
                             />
@@ -324,7 +324,7 @@ export default function UploadContent() {
                         </TableCell>
                         <TableCell>
                           <div className="border rounded-sm">
-                            <input
+                            <Textarea
                               type="text"
                               className="py-3"
                               value={keywords}
@@ -334,7 +334,7 @@ export default function UploadContent() {
                         </TableCell>
                         <TableCell>
                           <div className="border rounded-sm">
-                            <input
+                            <Textarea
                               type="text"
                               className="py-3"
                               value={category}
