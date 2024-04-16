@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCanister } from "@connect2ic/react";
 import { useState, useEffect } from "react";
+import LoadingScreen from "../../LoadingScreen";
 export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [userData, setUserData] = useState(null);
@@ -130,7 +131,7 @@ export default function ProfileContent() {
   };
 
   if (!userData) {
-    return <div>Loading...</div>;
+    return <LoadingScreen/>;
   }
   return (
     <div>

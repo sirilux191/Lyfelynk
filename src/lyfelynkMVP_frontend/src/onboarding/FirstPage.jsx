@@ -8,6 +8,7 @@ import { ConnectButton, ConnectDialog } from "@connect2ic/react";
 import "../connect2ic/connect2ic.css";
 import { useCanister } from "@connect2ic/react";
 import { useEffect, useState } from "react";
+import LoadingScreen from "../LoadingScreen";
 
 export default function FirstPageContent() {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export default function FirstPageContent() {
     setIsLoading(false);
   }, [isCalled]);
   if (isLoading) {
-    return <div>Loading!!!!</div>;
+    return <LoadingScreen/>;
   }
   return (
     <section className="px-6 flex justify-center items-center h-screen bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
