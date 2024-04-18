@@ -1,7 +1,6 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
-import HashMap "mo:base/HashMap";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
@@ -19,6 +18,7 @@ import Types "Types";
 
 actor LyfeLynk {
 
+  let admin = Principal.fromText("e5s2y-wkvcn-fze3a-a2dwf-5iz4d-iv3fb-nl4qb-7pezr-wepwa-pua6f-xqe");
   let healthUserIDMap = Map.new<Principal, Types.HealthIDUser>();
   let healthProfessionalIDMap = Map.new<Principal, Types.HealthIDProfessional>();
   let healthFacilityIDMap = Map.new<Principal, Types.HealthIDFacility>();
@@ -26,21 +26,26 @@ actor LyfeLynk {
   let principalIDMap = Map.new<Principal, Text>(); //Map of Principal of User with Health ID
   let idPrincipalMap = Map.new<Text, Principal>(); //Map of Health ID of User with Principal
 
-  let dataAssetStorage = Map.new<Text, HashMap.HashMap<Text, Types.DataAsset>>(); //UserID <---> Timestamp <---> DataAsset
+  let dataAssetStorage = Map.new<Text, Map.Map<Text, Types.DataAsset>>(); //UserID <---> Timestamp <---> DataAsset
   let dataAccessTP = Map.new<Text, [Principal]>(); //AssetIDUnique <---> user
   let dataAccessPT = Map.new<Principal, [Text]>(); //User <---> AssetIDUnique
   let sharedFileList = Map.new<Principal, [Types.sharedActivityInfo]>();
   let purchasedDataAssetList = Map.new<Principal, [Types.purchasedInfo]>();
 
-  stable var userRegistrationNumberCount : Nat = 10000000000000;
-  stable var profRegistrationNumberCount : Nat = 100000000000;
-  stable var facilityRegistrationNumberCount : Nat = 1000000000;
+  let tokenRequestMap = Map.new<Principal, Types.TokenRequestAmounts>();
+  var userRegistrationNumberCount : Nat = 10000000000000;
+  var profRegistrationNumberCount : Nat = 100000000000;
+  var facilityRegistrationNumberCount : Nat = 1000000000;
 
-  let userListings = Map.new<Principal, HashMap.HashMap<Text, Types.Listing>>();
+  let userListings = Map.new<Principal, Map.Map<Text, Types.Listing>>();
 
   //AUTHENTICATION FUNCTIONS
-  public shared ({ caller }) func whoami() : async Principal {
-    return caller;
+  public shared ({ caller }) func whoami() : async Text {
+    return Principal.toText(caller);
+  };
+
+  public func getActorPrincipal() : async Text {
+    return Principal.toText(Principal.fromActor(LyfeLynk));
   };
 
   public shared ({ caller }) func isRegistered() : async Text {
@@ -343,22 +348,71 @@ actor LyfeLynk {
         let healthDataMap = Map.get(dataAssetStorage, thash, userID);
         switch (healthDataMap) {
           case (?existingDataMap) {
-            existingDataMap.put(timestamp, healthData);
+            Map.set(existingDataMap, thash, timestamp, healthData);
             Map.set(dataAssetStorage, thash, userID, existingDataMap);
 
-            Map.set(dataAccessPT, phash, caller, [uniqueID]);
-            Map.set(dataAccessTP, thash, uniqueID, [caller]);
+            // Update dataAccessPT map
+            let tempArray1 = Map.get(dataAccessPT, phash, caller);
+            switch (tempArray1) {
+              case (?array) {
+                let buff = Buffer.fromArray<Text>(array);
+                buff.add(uniqueID);
+                Map.set(dataAccessPT, phash, caller, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessPT, phash, caller, [uniqueID]);
+              };
+            };
+
+            // Update dataAccessTP map
+            let tempArray2 = Map.get(dataAccessTP, thash, uniqueID);
+            switch (tempArray2) {
+              case (?array) {
+                let buff = Buffer.fromArray<Principal>(array);
+                buff.add(caller);
+                Map.set(dataAccessTP, thash, uniqueID, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessTP, thash, uniqueID, [caller]);
+              };
+            };
+
             #ok(uniqueID);
           };
           case (null) {
-            let newDataMap = HashMap.HashMap<Text, Types.DataAsset>(0, Text.equal, Text.hash);
-            newDataMap.put(timestamp, healthData);
+            let newDataMap = Map.new<Text, Types.DataAsset>();
+            Map.set(newDataMap, thash, timestamp, healthData);
             Map.set(dataAssetStorage, thash, userID, newDataMap);
 
-            Map.set(dataAccessPT, phash, caller, [uniqueID]);
-            Map.set(dataAccessTP, thash, uniqueID, [caller]);
+            // Update dataAccessPT map
+            let tempArray1 = Map.get(dataAccessPT, phash, caller);
+            switch (tempArray1) {
+              case (?array) {
+                let buff = Buffer.fromArray<Text>(array);
+                buff.add(uniqueID);
+                Map.set(dataAccessPT, phash, caller, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessPT, phash, caller, [uniqueID]);
+              };
+            };
+
+            // Update dataAccessTP map
+            let tempArray2 = Map.get(dataAccessTP, thash, uniqueID);
+            switch (tempArray2) {
+              case (?array) {
+                let buff = Buffer.fromArray<Principal>(array);
+                buff.add(caller);
+                Map.set(dataAccessTP, thash, uniqueID, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessTP, thash, uniqueID, [caller]);
+              };
+            };
+
             #ok(uniqueID);
           };
+
         };
       };
       case (null) {
@@ -367,48 +421,29 @@ actor LyfeLynk {
     };
   };
 
-  public shared query ({ caller }) func getUserDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
+  public shared ({ caller }) func getUserDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
 
     if (Principal.isAnonymous(caller)) {
-
       return #err("Anonymous principals cannot access data assets. Please log in with a wallet or internet identity.");
-
     };
 
     let userID = Map.get(principalIDMap, phash, caller);
-
     switch (userID) {
-
       case (?id) {
-
         let dataAssetMap = Map.get(dataAssetStorage, thash, id);
-
         switch (dataAssetMap) {
-
           case (?assetMap) {
-
-            let assetList = Iter.toArray<(Text, Types.DataAsset)>(assetMap.entries());
-
+            let assetList = Iter.toArray<(Text, Types.DataAsset)>(Map.entries(assetMap));
             return #ok(assetList);
-
           };
-
           case (null) {
-
             return #err("No data assets found for the user.");
-
           };
-
         };
-
       };
-
       case (null) {
-
         return #err("Caller is not a registered user.");
-
       };
-
     };
 
   };
@@ -427,7 +462,7 @@ actor LyfeLynk {
             let dataAssetMap = Map.get(dataAssetStorage, thash, ownerID);
             switch (dataAssetMap) {
               case (?assetMap) {
-                let docInAssetMap = assetMap.get(timestamp);
+                let docInAssetMap = Map.get(assetMap, thash, timestamp);
                 switch (docInAssetMap) {
                   case (?doc) {
                     let tempArray1 = Map.get(dataAccessPT, phash, userIDResult);
@@ -572,7 +607,7 @@ actor LyfeLynk {
     };
   };
 
-  public shared query ({ caller }) func getSharedFileList() : async Result.Result<[Types.sharedActivityInfo], Text> {
+  public shared ({ caller }) func getSharedFileList() : async Result.Result<[Types.sharedActivityInfo], Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous persons can't revoke access, please login with wallet or internet identity");
     };
@@ -587,7 +622,7 @@ actor LyfeLynk {
     };
   };
 
-  public shared query ({ caller }) func getSharedDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
+  public shared ({ caller }) func getSharedDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous principals cannot access shared data assets. Please log in with a wallet or internet identity.");
     };
@@ -608,7 +643,7 @@ actor LyfeLynk {
                     let dataAssetMap = Map.get(dataAssetStorage, thash, ownerID);
                     switch (dataAssetMap) {
                       case (?assetMap) {
-                        let dataAsset = assetMap.get(timestamp);
+                        let dataAsset = Map.get(assetMap, thash, timestamp);
                         switch (dataAsset) {
                           case (?asset) {
                             sharedAssets.add((assetID, asset));
@@ -655,7 +690,7 @@ actor LyfeLynk {
         let dataAssetMap = Map.get(dataAssetStorage, thash, id);
         switch (dataAssetMap) {
           case (?assetMap) {
-            let assetData = assetMap.get(timestamp);
+            let assetData = Map.get(assetMap, thash, timestamp);
             switch (assetData) {
               case (?asset) {
                 let g = Source.Source();
@@ -675,12 +710,12 @@ actor LyfeLynk {
                 let existingListings = Map.get(userListings, phash, caller);
                 switch (existingListings) {
                   case (?listings) {
-                    listings.put(listingID, newListing);
+                    Map.set(listings, thash, listingID, newListing);
                     Map.set(userListings, phash, caller, listings);
                   };
                   case (null) {
-                    let newListingMap = HashMap.HashMap<Text, Types.Listing>(1, Text.equal, Text.hash);
-                    newListingMap.put(listingID, newListing);
+                    let newListingMap = Map.new<Text, Types.Listing>();
+                    Map.set(newListingMap, thash, listingID, newListing);
                     Map.set(userListings, phash, caller, newListingMap);
                   };
                 };
@@ -702,7 +737,7 @@ actor LyfeLynk {
       };
     };
   };
-
+  ///Check
   public shared ({ caller }) func deleteListingByAssetID(listingID : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous principals cannot delete listings. Please log in with a wallet or internet identity.");
@@ -711,7 +746,7 @@ actor LyfeLynk {
     let listings = Map.get(userListings, phash, caller);
     switch (listings) {
       case (?listings) {
-        let result = listings.remove(listingID);
+        let result = Map.remove(listings, thash, listingID);
         switch (result) {
           case (?listing) {
             Map.set(userListings, phash, caller, listings);
@@ -728,7 +763,7 @@ actor LyfeLynk {
     };
   };
 
-  public shared query func getAllListings() : async Result.Result<[Types.Listing], Text> {
+  public query func getAllListings() : async Result.Result<[Types.Listing], Text> {
     if (Map.size(userListings) == 0) {
       return #err("No listings found.");
     };
@@ -736,7 +771,7 @@ actor LyfeLynk {
     let allListings = Buffer.Buffer<Types.Listing>(0);
 
     for ((user, listings) in Map.entries(userListings)) {
-      for (listing in listings.vals()) {
+      for (listing in Map.vals(listings)) {
         allListings.add(listing);
       };
     };
@@ -748,7 +783,7 @@ actor LyfeLynk {
     return #ok(Buffer.toArray(allListings));
   };
 
-  public shared query ({ caller }) func getUserListings() : async Result.Result<[Types.Listing], Text> {
+  public shared ({ caller }) func getUserListings() : async Result.Result<[Types.Listing], Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous principals cannot access user listings. Please log in with a wallet or internet identity.");
     };
@@ -757,7 +792,7 @@ actor LyfeLynk {
     switch (listings) {
       case (?listings) {
         let userListings = Buffer.Buffer<Types.Listing>(0);
-        for (listing in listings.vals()) {
+        for (listing in Map.vals(listings)) {
           userListings.add(listing);
         };
         return #ok(Buffer.toArray(userListings));
@@ -790,7 +825,7 @@ actor LyfeLynk {
         let sellerListings = Map.get(userListings, phash, seller);
         switch (sellerListings) {
           case (?listings) {
-            let listing = listings.get(listingID);
+            let listing = Map.get(listings, thash, listingID);
             switch (listing) {
               case (?listing) {
 
@@ -811,16 +846,20 @@ actor LyfeLynk {
                           return #err("Not enough Funds");
                         };
 
-                        let tokenTransferResult = await tokenCanister_api.icrc1_transfer({
+                        let tokenTransferResult = await tokenCanister_api.icrc2_transfer_from({
                           to = {
                             owner = seller;
+                            subaccount = null;
+                          };
+                          from = {
+                            owner = caller;
                             subaccount = null;
                           };
                           amount = listing.price * 100000000;
                           fee = ?10000;
                           memo = null;
                           created_at_time = null;
-                          from_subaccount = null;
+                          spender_subaccount = null;
                         });
 
                         switch (tokenTransferResult) {
@@ -865,15 +904,15 @@ actor LyfeLynk {
                           sharedType = #Sold;
                         };
 
-                        let ownerSharedFiles = Map.get(sharedFileList, phash, caller);
+                        let ownerSharedFiles = Map.get(sharedFileList, phash, seller);
                         switch (ownerSharedFiles) {
                           case (?files) {
                             let buff = Buffer.fromArray<Types.sharedActivityInfo>(files);
                             buff.add(sharedInfo);
-                            Map.set(sharedFileList, phash, caller, Buffer.toArray(buff));
+                            Map.set(sharedFileList, phash, seller, Buffer.toArray(buff));
                           };
                           case (null) {
-                            Map.set(sharedFileList, phash, caller, [sharedInfo]);
+                            Map.set(sharedFileList, phash, seller, [sharedInfo]);
                           };
                         };
 
@@ -925,7 +964,7 @@ actor LyfeLynk {
       };
     };
   };
-  public shared query ({ caller }) func getPurchasedDataAssets() : async Result.Result<[(Types.DataAsset, Types.purchasedInfo)], Text> {
+  public shared ({ caller }) func getPurchasedDataAssets() : async Result.Result<[(Types.DataAsset, Types.purchasedInfo)], Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
     };
@@ -942,7 +981,7 @@ actor LyfeLynk {
               let dataAssetMap = Map.get(dataAssetStorage, thash, ownerID);
               switch (dataAssetMap) {
                 case (?assetMap) {
-                  let dataAsset = assetMap.get(timestamp);
+                  let dataAsset = Map.get(assetMap, thash, timestamp);
                   switch (dataAsset) {
                     case (?asset) {
                       purchasedInfoList.add((asset, purchasedInformation));
@@ -962,10 +1001,69 @@ actor LyfeLynk {
       };
     };
 
-    if (purchasedInfoList.size() == 0) {
-      return #err("No purchased data assets found for the caller.");
+    return #ok(Buffer.toArray(purchasedInfoList));
+  };
+
+  public shared ({ caller }) func getAllTokenRequests() : async Result.Result<[(Principal, Types.TokenRequestAmounts)], Text> {
+    if (caller != admin) {
+      return #err("you are not admin");
+    };
+    return #ok(Iter.toArray(Map.entries(tokenRequestMap)));
+  };
+
+  public shared ({ caller }) func requestForTokens(amount : Nat) : async Result.Result<Text, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
     };
 
-    return #ok(Buffer.toArray(purchasedInfoList));
+    let previousStats = Map.get(tokenRequestMap, phash, caller);
+    switch (previousStats) {
+      case (?stats) {
+        let amounts = stats;
+        let newAmounts : Types.TokenRequestAmounts = {
+          approvedTillNow = amounts.approvedTillNow;
+          currentRequestAmount = amount;
+        };
+
+        Map.set(tokenRequestMap, phash, caller, newAmounts);
+        #ok("Request made sucessfully");
+      };
+      case (null) {
+        let newAmounts : Types.TokenRequestAmounts = {
+          approvedTillNow = 0;
+          currentRequestAmount = amount;
+        };
+        Map.set(tokenRequestMap, phash, caller, newAmounts);
+        #ok("Request made sucessfully");
+      };
+    };
+
+  };
+
+  public shared ({ caller }) func requestApproveReject(user : Principal, amount : Nat) : async Result.Result<Text, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
+    };
+    if (caller != admin) {
+      return #err("you are not admin");
+    };
+
+    let previousStats = Map.get(tokenRequestMap, phash, user);
+    switch (previousStats) {
+      case (?stats) {
+        let amounts = stats;
+        let newAmounts : Types.TokenRequestAmounts = {
+          approvedTillNow = amounts.approvedTillNow + amount;
+          currentRequestAmount = 0;
+        };
+
+        Map.set(tokenRequestMap, phash, user, newAmounts);
+        #ok("Request handled successfully");
+      };
+      case (null) {
+
+        #err("No request found from that user");
+      };
+    };
   };
 };

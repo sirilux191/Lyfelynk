@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -10,7 +10,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import formatDate from "date-fns/format";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import LoadingScreen from "../../LoadingScreen";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useEffect, useState } from "react";
 import { useCanister } from "@connect2ic/react";
 
 const columns = [
@@ -61,6 +62,7 @@ function RecentActivityTable() {
   const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState([]);
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSharedFilesList = async () => {
@@ -69,11 +71,14 @@ function RecentActivityTable() {
         console.log(result);
         if (result.ok) {
           setData(result.ok);
+          setLoading(false);
         } else {
           console.error("Error fetching shared files list:", result.err);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching shared files list:", error);
+        setLoading(false);
       }
     };
 
@@ -98,7 +103,9 @@ function RecentActivityTable() {
       rowSelection,
     },
   });
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <div>
       <div className="flex items-center py-4">

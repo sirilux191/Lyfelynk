@@ -17,13 +17,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft } from "lucide-react";
 import FileUpload from "./file-upload";
 import { DatePicker } from "@/Functions/DatePicker";
 import { jsPDF } from "jspdf";
 import { useState } from "react";
 import { useCanister } from "@connect2ic/react";
+import LoadingScreen from "../../LoadingScreen";
 
 export default function UploadContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
@@ -40,6 +41,7 @@ export default function UploadContent() {
   const [description, setDescription] = useState("");
   const [keywords, setKeywords] = useState("");
   const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -51,6 +53,7 @@ export default function UploadContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     // Generate PDF
     const doc = new jsPDF();
@@ -89,16 +92,20 @@ export default function UploadContent() {
       Object.keys(result).forEach((key) => {
         if (key === "err") {
           alert(result[key]);
+          setLoading(false);
         }
         if (key === "ok") {
           console.log(result[key]);
           alert("File uploaded successfully");
+          setLoading(false);
         }
       });
     };
     fileReader.readAsArrayBuffer(pdfFile);
   };
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col items-center justify-center p-8">

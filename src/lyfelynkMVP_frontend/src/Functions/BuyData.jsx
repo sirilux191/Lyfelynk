@@ -11,8 +11,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { ShoppingCart } from "lucide-react";
+import { useState } from "react";
 import { useCanister } from "@connect2ic/react";
-
 export function BuyDataFunc({ listingID, seller }) {
   const [open, setOpen] = useState(false); // Managing dialog's open state
 
@@ -38,9 +38,15 @@ export function BuyDataFunc({ listingID, seller }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}
+    >
       <DialogTrigger asChild>
-        <Button className="p-2 text-white" onClick={() => setOpen(true)}> 
+        <Button
+          className="p-2 text-white"
+          onClick={() => setOpen(true)}
+        >
           <ShoppingCart />
         </Button>
       </DialogTrigger>

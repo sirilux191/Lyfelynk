@@ -1,9 +1,9 @@
 {
   "canisters": {
-    "vetkd_system_api": {
-      "candid": "vetkd_system_api.did",
+    "icrc1_ledger_canister": {
       "type": "custom",
-      "wasm": "vetkd_system_api.wasm"
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/ff10ea1dba07c0f66c66536a46a97146cf260e90/rs/rosetta-api/icrc1/ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/ff10ea1dba07c0f66c66536a46a97146cf260e90/canisters/ic-icrc1-ledger.wasm.gz"
     },
     "lyfelynkMVP_backend": {
       "main": "src/lyfelynkMVP_backend/main.mo",

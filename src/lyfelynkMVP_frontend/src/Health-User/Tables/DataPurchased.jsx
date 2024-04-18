@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -7,10 +9,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, Download } from "lucide-react";
-
+import { ChevronDown } from "lucide-react";
+import formatDate from "date-fns/format";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import LoadingScreen from "../../LoadingScreen";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -27,60 +29,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import DownloadFile from "@/Functions/DownloadFile";
-
-const initialData = [
-  { id: "doc1", name: "Loremipsum", datePurchased: "Today 5:15 PM" },
-  { id: "doc2", name: "Loremissspm", datePurchased: "Today 9:48 AM" },
-  { id: "doc3", name: "IpsumLore", datePurchased: "Yesterday" },
-  { id: "doc4", name: "Sbocedfsjsjs", datePurchased: "Yesterday" },
-  { id: "doc5", name: "SimpsonLorem", datePurchased: "Monday" },
-];
+import { useCanister } from "@connect2ic/react";
 
 const columns = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    accessorKey: "title",
+    header: "Title",
   },
   {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("name")}</div>
-    ),
+    accessorKey: "listingID",
+    header: "Listing ID",
   },
   {
-    accessorKey: "datePurchased",
-    header: "Date Purchased",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("datePurchased")}</div>
-    ),
+    accessorKey: "seller",
+    header: "Seller",
   },
   {
-    id: "sell",
+    accessorKey: "assetID",
+    header: "Asset ID",
+  },
+  {
+    accessorKey: "time",
+    header: "Date Time",
+    cell: ({ getValue }) => {
+      const timestamp = getValue();
+      const date = new Date(Number(timestamp) / 1000000);
+      return formatDate(date, "yyyy-MM-dd HH:mm:ss");
+    },
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+  },
+  {
+    id: "download",
     header: "",
-    cell: () => (
-      <DownloadFile/>
+    cell: ({ row }) => (
+      <DownloadFile
+        data={row.original.dataAsset.data}
+        title={row.original.dataAsset.title}
+        format={row.original.dataAsset.metadata.format}
+      />
     ),
-    enableSorting: false,
-    enableHiding: false,
   },
 ];
 
@@ -89,9 +79,37 @@ function DataPurchasedTable() {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+  const [data, setData] = useState([]);
+  const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPurchasedDataAssets = async () => {
+      try {
+        const result = await lyfelynkMVP_backend.getPurchasedDataAssets();
+        if (result.ok) {
+          const purchasedAssets = result.ok.map(
+            ([dataAsset, purchasedInfo]) => ({
+              ...purchasedInfo,
+              dataAsset,
+            })
+          );
+          setData(purchasedAssets);
+          setLoading(false);
+        } else {
+          console.error("Error fetching purchased data assets:", result.err);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching purchased data assets:", error);
+      }
+    };
+
+    fetchPurchasedDataAssets();
+  }, [lyfelynkMVP_backend]);
 
   const table = useReactTable({
-    data: initialData,
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -108,21 +126,26 @@ function DataPurchasedTable() {
       rowSelection,
     },
   });
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter names..."
-          value={table.getColumn("name")?.getFilterValue() ? String(table.getColumn("name")?.getFilterValue()) : ""}
+          value={table.getColumn("name")?.getFilterValue() || ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="mr-2"
+          className="w-full max-w-sm mr-2"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="ml-auto"
+            >
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -142,7 +165,7 @@ function DataPurchasedTable() {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -162,7 +185,7 @@ function DataPurchasedTable() {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -188,11 +211,12 @@ function DataPurchasedTable() {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

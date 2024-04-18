@@ -32,7 +32,7 @@ import { SellDataFunc } from "@/Functions/SellData";
 import { ShareDataFunc } from "@/Functions/ShareData";
 import DownloadFile from "../../Functions/DownloadFile";
 import { useCanister } from "@connect2ic/react";
-
+import LoadingScreen from "../../LoadingScreen";
 const columns = [
   {
     accessorKey: "title",
@@ -84,6 +84,7 @@ export function ShareSellTable() {
   const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState([]);
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserDataAssets = async () => {
@@ -98,11 +99,14 @@ export function ShareSellTable() {
             dataToDownload: asset.data,
           }));
           setData(dataAssets);
+          setLoading(false);
         } else {
           console.error("Error fetching user data assets:", result.err);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching user data assets:", error);
+        setLoading(false);
       }
     };
 
@@ -127,7 +131,9 @@ export function ShareSellTable() {
       rowSelection,
     },
   });
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <div>
       <div className="flex items-center py-4">

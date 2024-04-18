@@ -1,12 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  SelectValue,
-  SelectTrigger,
-  SelectItem,
-  SelectContent,
-  Select,
-} from "@/components/ui/select";
+import LoadingScreen from "../../LoadingScreen";
+
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 // Connect2ic: Import Connect2ic library to interact with the backend canister
@@ -30,8 +25,11 @@ export default function RegisterPage3Content() {
   const [pincode, setPincode] = useState("");
   const [serviceName, setServiceName] = useState("");
   const [serviceDesc, setServiceDesc] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const registerService = async () => {
+    setLoading(true);
+
     const demoInfo = {
       facultyName,
       country,
@@ -69,13 +67,18 @@ export default function RegisterPage3Content() {
     Object.keys(result).forEach((key) => {
       if (key == "err") {
         alert(result[key]);
+        setLoading(false);
       }
       if (key == "ok") {
-        alert("Your Health Facility ID is :", result[key]);
+        alert(result[key]);
+        setLoading(false);
         navigate("verify");
       }
     });
   };
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <section className="px-6 flex justify-center items-center h-screen bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
       <div className="flex flex-col lg:flex-row md:w-4/6">

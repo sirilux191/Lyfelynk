@@ -14,6 +14,7 @@ import { useCanister } from "@connect2ic/react";
 //
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import LoadingScreen from "../../LoadingScreen";
 
 export default function RegisterPage2Content() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
@@ -33,8 +34,10 @@ export default function RegisterPage2Content() {
   const [occupation, setOccupation] = useState("");
   const [certificationId, setCertificationId] = useState("");
   const [company, setCompany] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const registerProfessional = async () => {
+    setLoading(true);
     const demoInfo = {
       name,
       dob,
@@ -77,13 +80,18 @@ export default function RegisterPage2Content() {
     Object.keys(result).forEach((key) => {
       if (key == "err") {
         alert(result[key]);
+        setLoading(false);
       }
       if (key == "ok") {
-        alert("Your Health Professional ID is :", result[key]);
+        alert(result[key]);
+        setLoading(false);
         navigate("verify");
       }
     });
   };
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <section className="px-6 flex justify-center items-center h-screen bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
       <div className="flex flex-col lg:flex-row md:w-4/6">

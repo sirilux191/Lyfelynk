@@ -10,6 +10,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "../../LoadingScreen";
 
 // Connect2ic: Import Connect2ic library to interact with the backend canister
 import { useCanister } from "@connect2ic/react";
@@ -33,8 +34,10 @@ export default function RegisterPage1Content() {
   const [state, setState] = useState("");
   const [heartRate, setHeartRate] = useState("");
   const [pincode, setPincode] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const registerUser = async () => {
+    setLoading(true);
     const demoInfo = {
       name,
       dob,
@@ -67,13 +70,18 @@ export default function RegisterPage1Content() {
     Object.keys(result).forEach((key) => {
       if (key == "err") {
         alert(result[key]);
+        setLoading(false);
       }
       if (key == "ok") {
-        alert("Your Health User ID is :", result[key]);
+        alert("User ID No. :" + result[key]);
+        setLoading(false);
         navigate("verify");
       }
     });
   };
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <section className="px-6 flex justify-center items-center h-screen bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
       <div className="flex flex-col lg:flex-row md:w-4/6">
@@ -110,6 +118,7 @@ export default function RegisterPage1Content() {
                   placeholder="Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -127,6 +136,7 @@ export default function RegisterPage1Content() {
                   type="date"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -214,6 +224,7 @@ export default function RegisterPage1Content() {
                   placeholder="Country"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
+                  required
                 />
               </div>
             </div>

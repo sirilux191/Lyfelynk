@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useCanister } from "@connect2ic/react";
 import { useState, useEffect } from "react";
 import LoadingScreen from "../../LoadingScreen";
+
 export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [userData, setUserData] = useState(null);
@@ -24,6 +25,7 @@ export default function ProfileContent() {
   const [state, setState] = useState("");
   const [heartRate, setHeartRate] = useState("");
   const [pincode, setPincode] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -89,6 +91,7 @@ export default function ProfileContent() {
 
   const handleUpdateUser = async (event) => {
     event.preventDefault();
+    setLoading(true);
     try {
       const demoInfo = {
         name,
@@ -122,16 +125,20 @@ export default function ProfileContent() {
       );
       if (result.ok) {
         alert("User health ID updated successfully");
+        setLoading(false);
       } else {
-        alert("Error updating user data:", result.err);
+        alert("Error updating user data:" + result.err);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error updating user data:", error);
     }
   };
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   if (!userData) {
-    return <LoadingScreen/>;
+    return <LoadingScreen />;
   }
   return (
     <div>

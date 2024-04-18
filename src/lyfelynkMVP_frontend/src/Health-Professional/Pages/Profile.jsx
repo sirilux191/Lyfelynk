@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useCanister } from "@connect2ic/react";
 import { useState, useEffect } from "react";
 import LoadingScreen from "../../LoadingScreen";
+
 export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [professionalData, setProfessionalData] = useState(null);
@@ -27,6 +28,7 @@ export default function ProfileContent() {
   const [occupation, setOccupation] = useState("");
   const [certificationId, setCertificationId] = useState("");
   const [company, setCompany] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchProfessionalData = async () => {
@@ -90,6 +92,7 @@ export default function ProfileContent() {
 
   const handleUpdateProfessional = async (event) => {
     event.preventDefault();
+    setLoading(true);
     try {
       const demoInfo = {
         name,
@@ -132,16 +135,20 @@ export default function ProfileContent() {
       );
       if (result.ok) {
         alert("Professional health ID updated successfully");
+        setLoading(false);
       } else {
         alert("Error updating professional data:", result.err);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error updating professional data:", error);
     }
   };
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   if (!professionalData) {
-    return <LoadingScreen/>;
+    return <LoadingScreen />;
   }
 
   return (

@@ -23,6 +23,7 @@ import { defaultProviders } from "@connect2ic/core/providers";
 import { Connect2ICProvider } from "@connect2ic/react";
 //
 import * as lyfelynkMVP_backend from "../../declarations/lyfelynkMVP_backend";
+import * as icrc1_ledger_canister from "../../declarations/icrc1_ledger_canister";
 //
 
 function App() {
@@ -93,6 +94,7 @@ function App() {
 const client = createClient({
   canisters: {
     lyfelynkMVP_backend,
+    icrc1_ledger_canister,
   },
   providers: defaultProviders,
 });

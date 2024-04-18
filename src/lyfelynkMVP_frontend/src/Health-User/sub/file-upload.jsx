@@ -8,10 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from "@/components/ui/textarea";
 import { CircleX } from "lucide-react";
 import { CSVgenerate } from "@/Functions/CSVgenerate";
 import { useCanister } from "@connect2ic/react";
+import LoadingScreen from "../../LoadingScreen";
+
 const FileUpload = () => {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [file, setFile] = useState(null);
@@ -20,6 +22,7 @@ const FileUpload = () => {
   const [keywords, setKeywords] = useState("");
   const [category, setCategory] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleFileInputChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -106,6 +109,8 @@ const FileUpload = () => {
 
   const handleUpload = async () => {
     if (file) {
+      setLoading(true);
+
       // Convert the file into ArrayBuffer
       const fileReader = new FileReader();
       fileReader.onload = async () => {
@@ -130,10 +135,12 @@ const FileUpload = () => {
         Object.keys(result).forEach((key) => {
           if (key === "err") {
             alert(result[key]);
+            setLoading(false);
           }
           if (key === "ok") {
             console.log(result[key]);
             alert("File uploaded successfully");
+            setLoading(false);
           }
         });
       };
@@ -147,7 +154,9 @@ const FileUpload = () => {
     setAuthor("");
     setErrorMessage("");
   };
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <div>
       <p className="text-sm mb-4 text-gray-500">

@@ -79,4 +79,9 @@ module Types {
         time : Nat;
         seller : Text;
     };
+
+    public type TokenRequestAmounts = {
+        currentRequestAmount : Nat;
+        approvedTillNow : Nat;
+    };
 };

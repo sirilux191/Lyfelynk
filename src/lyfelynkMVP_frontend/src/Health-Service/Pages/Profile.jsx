@@ -16,6 +16,7 @@ export default function ProfileContent() {
   const [pincode, setPincode] = useState("");
   const [serviceName, setServiceName] = useState("");
   const [serviceDesc, setServiceDesc] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchFacilityData = async () => {
@@ -72,6 +73,8 @@ export default function ProfileContent() {
 
   const handleUpdateFacility = async (event) => {
     event.preventDefault();
+    setLoading(true);
+
     try {
       const demoInfo = {
         facultyName,
@@ -110,16 +113,20 @@ export default function ProfileContent() {
 
       if (result.ok) {
         alert("Facility health ID updated successfully");
+        setLoading(false);
       } else {
         alert("Error updating facility data:", result.err);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error updating facility data:", error);
     }
   };
-
+  if (loading) {
+    return <LoadingScreen />;
+  }
   if (!facilityData) {
-    return <LoadingScreen/>;
+    return <LoadingScreen />;
   }
   return (
     <div>
