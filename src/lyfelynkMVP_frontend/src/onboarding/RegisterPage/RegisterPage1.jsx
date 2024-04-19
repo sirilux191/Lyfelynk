@@ -96,8 +96,8 @@ export default function RegisterPage1Content() {
   }
   return (
     <section className="bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
-      <OnboardingBanner/>
-      <div className="px-6 flex justify-center items-center h-screen" >  
+      <OnboardingBanner />
+      <div className="px-6 flex justify-center items-center h-screen">
         <div className="flex flex-col lg:flex-row md:w-4/6">
           <div className="flex-1 flex flex-col justify-center text-white p-4">
             <div className="flex items-center mb-4">
@@ -107,7 +107,9 @@ export default function RegisterPage1Content() {
                 src="/assets/lyfelynk.png"
               />
             </div>
-            <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
+            <p className="text-xl md:text-2xl">
+              Digitally Linking your health.
+            </p>
           </div>
 
           <div className="flex-1 items-center max-w-xl bg-background rounded-lg p-8">
