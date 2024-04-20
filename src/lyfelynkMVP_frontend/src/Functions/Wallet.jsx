@@ -101,44 +101,52 @@ export default function Wallet() {
             <Button
               size="sm"
               type="submit"
+              variant="outline"
               onClick={getAllowance}
             >
               Update Current Allowance Amount
             </Button>
+          </div>
+
+          <div className="space-y-2 pb-2">
             <Label>Your Balance</Label>
             <p className="text-3xl pb-2 font-semibold">
               {balance} LYF Tokens
             </p>
-            <Button
-              size="sm"
-              type="submit"
-              onClick={getBalance}
-            >
-              Update Current Balance Amount
-            </Button>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="allowance">Limit token spending amount</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                id="allowance"
-                placeholder="Enter allowance"
-                type="number"
-                min="0"
-                value={approveAmount}
-                onChange={(e) => setApproveAmount(e.target.value)}
-              />
+            <div className="flex items-end">
               <Button
                 size="sm"
                 type="submit"
-                onClick={approveSpendToken}
+                variant="outline"
+                onClick={getBalance}
               >
-                Submit
+                Update Current Balance Amount
               </Button>
             </div>
           </div>
+
         </div>
-        <div className="grid grid-cols-1 gap-4 pt-4">
+
+        <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="allowance">Limit token spending amount</Label>
+            <Input
+              id="allowance"
+              placeholder="Enter allowance"
+              type="number"
+              min="0"
+              value={approveAmount}
+              onChange={(e) => setApproveAmount(e.target.value)}
+            />
+            <Button
+              size="sm"
+              type="submit"
+              onClick={approveSpendToken}
+            >
+              Submit
+            </Button>
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="request">
               Request tokens to be airdropped
@@ -151,15 +159,16 @@ export default function Wallet() {
               value={requestAmount}
               onChange={(e) => setRequestAmount(e.target.value)}
             />
+            <div className="flex items-end">
+              <Button
+                type="submit"
+                onClick={sendTokenRequest}
+              >
+                Send request
+              </Button>
+            </div>
           </div>
-          <div className="flex items-end">
-            <Button
-              type="submit"
-              onClick={sendTokenRequest}
-            >
-              Send request
-            </Button>
-          </div>
+
         </div>
       </CardContent>
     </Card>
