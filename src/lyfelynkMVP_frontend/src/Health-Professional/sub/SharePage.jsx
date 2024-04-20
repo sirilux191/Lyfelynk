@@ -39,7 +39,7 @@ export default function ShareContent() {
                   value="shareddocuments"
                   className="w-1/2 text-center"
                 >
-                  Documents Shared With You
+                  Shared With You
                 </TabsTrigger>
               </TabsList>
 
