@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CircleX } from "lucide-react";
 import { CSVgenerate } from "@/Functions/CSVgenerate";
 import { useCanister } from "@connect2ic/react";
-import LoadingScreen from "../../LoadingScreen";
+import LoadingScreen from "../LoadingScreen";
 
 const FileUpload = () => {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
@@ -109,9 +109,8 @@ const FileUpload = () => {
 
   const handleUpload = async () => {
     if (file) {
-      setLoading(true);
-
       // Convert the file into ArrayBuffer
+      setLoading(true);
       const fileReader = new FileReader();
       fileReader.onload = async () => {
         const arrayBuffer = fileReader.result;
