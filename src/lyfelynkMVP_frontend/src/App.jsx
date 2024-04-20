@@ -24,6 +24,7 @@ import { Connect2ICProvider } from "@connect2ic/react";
 //
 import * as lyfelynkMVP_backend from "../../declarations/lyfelynkMVP_backend";
 import * as icrc1_ledger_canister from "../../declarations/icrc1_ledger_canister";
+import OnboardingBanner from "./OnboardingBanner";
 //
 
 function App() {
