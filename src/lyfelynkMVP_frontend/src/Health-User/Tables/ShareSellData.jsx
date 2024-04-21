@@ -59,6 +59,7 @@ const columns = [
     header: "",
     cell: ({ row }) => (
       <DownloadFile
+        uniqueID={row.original.userID + "-" + row.original.timestamp}
         data={row.original.dataToDownload}
         title={row.original.title}
         format={row.original.format}
@@ -89,9 +90,11 @@ export function ShareSellTable() {
   useEffect(() => {
     const fetchUserDataAssets = async () => {
       try {
+        const userId = await lyfelynkMVP_backend.getID();
         const result = await lyfelynkMVP_backend.getUserDataAssets();
         if (result.ok) {
           const dataAssets = result.ok.map(([timestamp, asset]) => ({
+            userID: userId.ok,
             timestamp,
             title: asset.title,
             description: asset.description,

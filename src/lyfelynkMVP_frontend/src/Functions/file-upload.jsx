@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Papa from 'papaparse';
+import Papa from "papaparse";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -296,7 +296,10 @@ const FileUpload = () => {
 
       {file && (
         <>
-          <Button onClick={handleUpload} className="my-2 mr-2">
+          <Button
+            onClick={handleUpload}
+            className="my-2 mr-2"
+          >
             Upload
           </Button>
           <CloudFunctionCallButton
@@ -325,7 +328,10 @@ const FileUpload = () => {
 };
 
 const CloudFunctionCallButton = ({ handleCallCloudFunction }) => (
-  <Button variant="outline" onClick={handleCallCloudFunction}>
+  <Button
+    variant="outline"
+    onClick={handleCallCloudFunction}
+  >
     Display File
   </Button>
 );

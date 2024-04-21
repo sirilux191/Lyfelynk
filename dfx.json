@@ -1,5 +1,10 @@
 {
   "canisters": {
+    "vetkd_system_api": {
+      "candid": "vetkd_system_api.did",
+      "type": "custom",
+      "wasm": "vetkd_system_api.wasm"
+    },
     "icrc1_ledger_canister": {
       "type": "custom",
       "candid": "https://raw.githubusercontent.com/dfinity/ic/ff10ea1dba07c0f66c66536a46a97146cf260e90/rs/rosetta-api/icrc1/ledger/ledger.did",

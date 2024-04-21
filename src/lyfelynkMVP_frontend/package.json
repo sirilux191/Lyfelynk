@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\""
   },
   "dependencies": {
+    "ic-vetkd-utils": "ic-vetkd-utils-0.1.0.tgz",
     "@connect2ic/core": "^0.2.0-beta.24",
     "@connect2ic/react": "^0.2.0-beta.24",
     "@dfinity/agent": "^0.15.7",
@@ -42,6 +43,8 @@
     "react-router-dom": "^6.22.3",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

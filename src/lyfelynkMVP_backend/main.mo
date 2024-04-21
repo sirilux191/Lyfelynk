@@ -15,6 +15,7 @@ import UUID "mo:uuid/UUID";
 
 import TokenTypes "TokenTypes";
 import Types "Types";
+import Hex "utility/Hex";
 
 actor LyfeLynk {
 
@@ -40,7 +41,7 @@ actor LyfeLynk {
   let userListings = Map.new<Principal, Map.Map<Text, Types.Listing>>();
 
   //AUTHENTICATION FUNCTIONS
-  public shared ({ caller }) func whoami() : async Text {
+  public shared query ({ caller }) func whoami() : async Text {
     return Principal.toText(caller);
   };
 
@@ -58,6 +59,17 @@ actor LyfeLynk {
     } else {
       return "Not Registered";
     };
+  };
+
+  public shared query ({ caller }) func getID() : async Result.Result<Text, Text> {
+    switch (Map.get(principalIDMap, phash, caller)) {
+      case (?value) { #ok(value) };
+      case (null) { #err("Sorry looks ur not registered") };
+    };
+  };
+
+  public query func getNumberOfUsers() : async [Nat] {
+    return [userRegistrationNumberCount, profRegistrationNumberCount, facilityRegistrationNumberCount];
   };
   //AUTHENTICATION FUNCTIONS
 
@@ -447,7 +459,39 @@ actor LyfeLynk {
     };
 
   };
+  public shared ({ caller }) func updateDataAsset(timestamp : Text, updatedData : Types.DataAsset) : async Result.Result<Text, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Anonymous persons can't update data assets, please login with wallet or internet identity");
+    };
 
+    let userID = Map.get(principalIDMap, phash, caller);
+    switch (userID) {
+      case (?id) {
+        let dataAssetMap = Map.get(dataAssetStorage, thash, id);
+        switch (dataAssetMap) {
+          case (?assetMap) {
+            let existingAsset = Map.get(assetMap, thash, timestamp);
+            switch (existingAsset) {
+              case (?asset) {
+                Map.set(assetMap, thash, timestamp, updatedData);
+                Map.set(dataAssetStorage, thash, id, assetMap);
+                return #ok("Data asset updated successfully");
+              };
+              case (null) {
+                return #err("No data asset found with the provided timestamp");
+              };
+            };
+          };
+          case (null) {
+            return #err("User has no data assets");
+          };
+        };
+      };
+      case (null) {
+        return #err("Caller is not a registered user");
+      };
+    };
+  };
   public shared ({ caller }) func grantDataAccess(userID : Text, timestamp : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Anonymous persons can't grant access, please login with wallet or internet identity");
@@ -1066,4 +1110,79 @@ actor LyfeLynk {
       };
     };
   };
+
+  //VetKey Section
+
+  type VETKD_SYSTEM_API = actor {
+    vetkd_public_key : ({
+      canister_id : ?Principal;
+      derivation_path : [Blob];
+      key_id : { curve : { #bls12_381 }; name : Text };
+    }) -> async ({ public_key : Blob });
+    vetkd_encrypted_key : ({
+      public_key_derivation_path : [Blob];
+      derivation_id : Blob;
+      key_id : { curve : { #bls12_381 }; name : Text };
+      encryption_public_key : Blob;
+    }) -> async ({ encrypted_key : Blob });
+  };
+
+  let vetkd_system_api : VETKD_SYSTEM_API = actor ("ck7s6-qyaaa-aaaag-ak43a-cai");
+
+  public func symmetric_key_verification_key() : async Text {
+    let { public_key } = await vetkd_system_api.vetkd_public_key({
+      canister_id = null;
+      derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
+      key_id = { curve = #bls12_381; name = "test_key_1" };
+    });
+    Hex.encode(Blob.toArray(public_key));
+  };
+
+  public shared ({ caller }) func encrypted_symmetric_key_for_caller(encryption_public_key : Blob) : async Text {
+    let buf = Buffer.Buffer<Nat8>(32);
+
+    buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(Principal.toText(caller)))));
+    let derivation_id = Blob.fromArray(Buffer.toArray(buf)); // prefix-free
+
+    let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
+      derivation_id;
+      public_key_derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
+      key_id = { curve = #bls12_381; name = "test_key_1" };
+      encryption_public_key;
+    });
+    Hex.encode(Blob.toArray(encrypted_key));
+  };
+
+  public shared ({ caller }) func encrypted_symmetric_key_for_dataAsset(uniqueID : Text, encryption_public_key : Blob) : async Result.Result<Text, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Anonymous principals cannot access data assets. Please log in with a wallet or internet identity.");
+    };
+
+    let accessList = Map.get(dataAccessTP, thash, uniqueID);
+    switch (accessList) {
+      case (?principalList) {
+        let found = Array.find<Principal>(principalList, func(p) { p == caller });
+        if (found == null) {
+          return #err("You don't have access to this data asset.");
+        };
+      };
+      case (null) {
+        return #err("Invalid unique ID or data asset not found.");
+      };
+    };
+
+    let buf = Buffer.Buffer<Nat8>(32);
+    buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(uniqueID))));
+    let derivation_id = Blob.fromArray(Buffer.toArray(buf)); // prefix-free
+
+    let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
+      derivation_id;
+      public_key_derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
+      key_id = { curve = #bls12_381; name = "test_key_1" };
+      encryption_public_key;
+    });
+
+    #ok(Hex.encode(Blob.toArray(encrypted_key)));
+  };
+  //VetKey Section
 };
