@@ -7,6 +7,7 @@ import {
   SelectContent,
   Select,
 } from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -70,11 +71,21 @@ export default function RegisterPage1Content() {
     );
     Object.keys(result).forEach((key) => {
       if (key == "err") {
-        alert(result[key]);
+        //alert(result[key]);
+        toast({
+          title: "Error",
+          description: result[key],
+          variant: "destructive",
+        });
         setLoading(false);
       }
       if (key == "ok") {
-        alert("User ID No. :" + result[key]);
+        //alert("User ID No. :" + result[key]);
+        toast({
+          title: "Success",
+          description: "User ID No. :" + result[key],
+          variant: "destructive",
+        });
         setLoading(false);
         navigate("verify");
       }
