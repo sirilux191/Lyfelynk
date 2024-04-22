@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+
 import { ChevronRight } from "lucide-react";
 import { User } from "lucide-react";
 import { BriefcaseMedical } from "lucide-react";
 import { Building } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import { ConnectButton, ConnectDialog } from "@connect2ic/react";
 import "../connect2ic/connect2ic.css";
 import { useCanister } from "@connect2ic/react";
+
 import { useEffect, useState } from "react";
 import LoadingScreen from "../LoadingScreen";
 import OnboardingBanner from "../OnboardingBanner";
@@ -63,7 +67,12 @@ export default function FirstPageContent() {
         setIsCalled(!isCalled);
         setRegistrationStatus(result);
       } catch (error) {
-        alert(error);
+        //alert(error);
+        toast({
+          title: "Alert!",
+          description: error.message,
+          variant: "destructive",
+        });
       }
     };
 

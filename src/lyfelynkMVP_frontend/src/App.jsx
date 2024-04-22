@@ -17,6 +17,8 @@ import RegisteredContent3 from "./onboarding/RegisteredPage/RegisteredPage3";
 import AppRoute1 from "./Health-User/AppRoute";
 import AppRoute2 from "./Health-Professional/AppRoute";
 import AppRoute3 from "./Health-Service/AppRoute";
+
+import { Toaster } from "@/components/ui/toaster"
 //Connect2IC
 import { createClient } from "@connect2ic/core";
 import { defaultProviders } from "@connect2ic/core/providers";
@@ -30,6 +32,7 @@ import OnboardingBanner from "./OnboardingBanner";
 function App() {
   return (
     <ThemeProvider>
+      <Toaster/>
       <Router>
         <Routes>
           <Route
