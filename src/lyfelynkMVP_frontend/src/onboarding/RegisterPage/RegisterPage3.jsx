@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
 import LoadingScreen from "../../LoadingScreen";
 
 import { ChevronLeft } from "lucide-react";
@@ -67,11 +68,21 @@ export default function RegisterPage3Content() {
     );
     Object.keys(result).forEach((key) => {
       if (key == "err") {
-        alert(result[key]);
+        //alert(result[key]);
+        toast({
+          title: "Error",
+          description: result[key],
+          variant: "destructive",
+        });
         setLoading(false);
       }
       if (key == "ok") {
-        alert(result[key]);
+        //alert(result[key]);
+        toast({
+          title: "Success",
+          description: result[key],
+          variant: "success",
+        });
         setLoading(false);
         navigate("verify");
       }

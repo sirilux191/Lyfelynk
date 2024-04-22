@@ -84,7 +84,7 @@ export default function RegisterPage1Content() {
         toast({
           title: "Success",
           description: "User ID No. :" + result[key],
-          variant: "destructive",
+          variant: "success",
         });
         setLoading(false);
         navigate("verify");

@@ -7,6 +7,7 @@ import {
   SelectContent,
   Select,
 } from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 // Connect2ic: Import Connect2ic library to interact with the backend canister
@@ -80,11 +81,21 @@ export default function RegisterPage2Content() {
     );
     Object.keys(result).forEach((key) => {
       if (key == "err") {
-        alert(result[key]);
+        //alert(result[key]);
+        toast({
+          title: "Error",
+          description: result[key],
+          variant: "destructive",
+        });
         setLoading(false);
       }
       if (key == "ok") {
-        alert(result[key]);
+        //alert(result[key]);
+        toast({
+          title: "Success",
+          description: result[key],
+          variant: "success",
+        });
         setLoading(false);
         navigate("verify");
       }
