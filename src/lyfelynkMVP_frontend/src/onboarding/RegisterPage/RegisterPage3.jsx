@@ -9,6 +9,7 @@ import { useCanister } from "@connect2ic/react";
 //
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import OnboardingBanner from "../../OnboardingBanner";
 
 export default function RegisterPage3Content() {
   // Connect2ic: Use the "lyfelynkMVP_backend" canister
@@ -80,170 +81,173 @@ export default function RegisterPage3Content() {
     return <LoadingScreen />;
   }
   return (
-    <section className="px-6 flex justify-center items-center h-screen bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
-      <div className="flex flex-col lg:flex-row md:w-4/6">
-        <div className="flex-1 flex flex-col justify-center text-white p-4">
-          <div className="flex items-center mb-4">
-            <img
-              alt="Logo"
-              className="h-10 w-48"
-              src="/assets/lyfelynk.png"
-            />
-          </div>
-          <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
-        </div>
-
-        <div className="flex-1 items-center max-w-xl bg-background rounded-lg p-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-bold">Register Service</h2>
-            <Link to="/Register">
-              <ChevronLeft />
-            </Link>
+    <section className="bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-blue-700 via-blue-800 to-gray-900">
+      <OnboardingBanner/>
+      <div className="px-6 flex justify-center items-center h-screen">  
+        <div className="flex flex-col lg:flex-row md:w-4/6">
+          <div className="flex-1 flex flex-col justify-center text-white p-4">
+            <div className="flex items-center mb-4">
+              <img
+                alt="Logo"
+                className="h-10 w-48"
+                src="/assets/lyfelynk.png"
+              />
+            </div>
+            <p className="text-xl md:text-2xl">Digitally Linking your health.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="facultyname"
-              >
-                Faculty Name
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="facultyname"
-                  placeholder="Faculty Name"
-                  value={facultyName}
-                  onChange={(e) => setFacultyName(e.target.value)}
-                />
-              </div>
+          <div className="flex-1 items-center max-w-xl bg-background rounded-lg p-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl md:text-2xl font-bold">Register Service</h2>
+              <Link to="/Register">
+                <ChevronLeft />
+              </Link>
             </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="regId"
-              >
-                Registeration ID
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="regId"
-                  placeholder="Registeration ID"
-                  value={registrationId}
-                  onChange={(e) => setRegistrationId(e.target.value)}
-                />
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="facultyname"
+                >
+                  Faculty Name
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="facultyname"
+                    placeholder="Faculty Name"
+                    value={facultyName}
+                    onChange={(e) => setFacultyName(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="country"
-              >
-                Country
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="country"
-                  placeholder="Country"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="regId"
+                >
+                  Registeration ID
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="regId"
+                    placeholder="Registeration ID"
+                    value={registrationId}
+                    onChange={(e) => setRegistrationId(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="state"
-              >
-                State
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="state"
-                  placeholder="State"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                />
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="country"
+                >
+                  Country
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="country"
+                    placeholder="Country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="city"
-              >
-                City
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="city"
-                  placeholder="City"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="state"
+                >
+                  State
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="state"
+                    placeholder="State"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="pincode"
-              >
-                Pincode
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="pincode"
-                  placeholder="Pincode"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                />
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="city"
+                >
+                  City
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="city"
+                    placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="service_name"
-              >
-                Service Name
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="service_name"
-                  placeholder="Service Name"
-                  value={serviceName}
-                  onChange={(e) => setServiceName(e.target.value)}
-                />
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="pincode"
+                >
+                  Pincode
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="pincode"
+                    placeholder="Pincode"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                className="block text-sm font-medium leading-5 text-foreground"
-                htmlFor="service_name"
-              >
-                Service Desc
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="service_name"
-                  placeholder="Service Desc"
-                  value={serviceDesc}
-                  onChange={(e) => setServiceDesc(e.target.value)}
-                />
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="service_name"
+                >
+                  Service Name
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="service_name"
+                    placeholder="Service Name"
+                    value={serviceName}
+                    onChange={(e) => setServiceName(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium leading-5 text-foreground"
+                  htmlFor="service_name"
+                >
+                  Service Desc
+                </label>
+                <div className="mt-1">
+                  <Input
+                    id="service_name"
+                    placeholder="Service Desc"
+                    value={serviceDesc}
+                    onChange={(e) => setServiceDesc(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
+            <Button
+              className="w-full"
+              onClick={registerService}
+            >
+              Submit
+            </Button>
           </div>
-          <Button
-            className="w-full"
-            onClick={registerService}
-          >
-            Submit
-          </Button>
         </div>
       </div>
     </section>
