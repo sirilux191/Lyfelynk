@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import Papa from 'papaparse';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -23,6 +25,7 @@ const FileUpload = () => {
   const [category, setCategory] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [csvData, setCsvData] = useState(null); // State to store CSV data
 
   const handleFileInputChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -146,6 +149,7 @@ const FileUpload = () => {
       fileReader.readAsArrayBuffer(file.file);
     }
   };
+
   const handleRemoveFile = () => {
     setFile(null);
     setDescription("");
@@ -153,9 +157,51 @@ const FileUpload = () => {
     setAuthor("");
     setErrorMessage("");
   };
+
+  const handleCallCloudFunction = async () => {
+    if (!file) {
+      alert("Please upload a file first!");
+      return;
+    }
+
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("image", file.file);
+
+    try {
+      const response = await axios.post(
+        "https://us-central1-document-416209.cloudfunctions.net/function-1",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "blob",
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Parse CSV data using papaparse
+      Papa.parse(url, {
+        download: true,
+        complete: function (results) {
+          // Set CSV data to state
+          setCsvData(results.data);
+        },
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <LoadingScreen />;
   }
+
   return (
     <div>
       <p className="text-sm mb-4 text-gray-500">
@@ -250,17 +296,38 @@ const FileUpload = () => {
 
       {file && (
         <>
-          <Button
-            onClick={handleUpload}
-            className="my-2"
-          >
+          <Button onClick={handleUpload} className="my-2 mr-2">
             Upload
           </Button>
-          <CSVgenerate />
+          <CloudFunctionCallButton
+            handleCallCloudFunction={handleCallCloudFunction}
+          />
         </>
+      )}
+
+      {csvData && (
+        <div className="overflow-x-auto">
+          <table>
+            <tbody>
+              {csvData.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 };
+
+const CloudFunctionCallButton = ({ handleCallCloudFunction }) => (
+  <Button variant="outline" onClick={handleCallCloudFunction}>
+    Show File
+  </Button>
+);
 
 export default FileUpload;
