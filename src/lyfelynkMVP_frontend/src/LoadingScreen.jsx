@@ -42,7 +42,7 @@ const LoadingScreen = () => {
       <div className="text-primary text-center">
         <Heart className="h-12 w-12 mt-8" />
       </div>
-      <p className="mt-4 text-sm text-primary">{phrase}</p>
+      <p className="mt-4 text-sm text-primary text-center">{phrase}</p>
     </div>
   );
 };
