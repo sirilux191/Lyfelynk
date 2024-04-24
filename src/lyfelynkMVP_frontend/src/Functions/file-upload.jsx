@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { CircleX } from "lucide-react";
-import { CSVgenerate } from "@/Functions/CSVgenerate";
 import { useCanister } from "@connect2ic/react";
 import LoadingScreen from "../LoadingScreen";
 

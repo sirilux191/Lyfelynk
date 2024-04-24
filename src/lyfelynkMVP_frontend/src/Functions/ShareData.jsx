@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 
 export function ShareDataFunc({ assetID }) {
   const [userId, setUserId] = useState("");
@@ -24,10 +25,20 @@ export function ShareDataFunc({ assetID }) {
     try {
       const result = await lyfelynkMVP_backend.grantDataAccess(userId, assetID);
       if (result.ok) {
-        alert("Access granted successfully");
+        //alert("Access granted successfully");
+        toast({
+          title: "Access Granted!",
+          description: "User has been granted access to the data.",
+          variant: "success",
+        });
         setOpen(false); //dialog closes
       } else {
-        alert("Error granting access: " + result.err);
+        //alert("Error granting access: " + result.err);
+        toast({
+          title: "Error Granting Access",
+          description: `Error: ${result.err}`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error granting access:", error);

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 
 export function SellDataFunc({ assetID }) {
   const [title, setTitle] = useState("");
@@ -32,10 +33,20 @@ export function SellDataFunc({ assetID }) {
         assetID
       );
       if (result.ok) {
-        alert("Listing added successfully");
+        //alert("Listing added successfully");
+        toast({
+          title: "Listing Added!",
+          description: "Your listing has been successfully created.",
+          variant: "success",
+        });
         setOpen(false); //dialog closes
       } else {
-        alert("Error adding listing: " + result.err);
+        //alert("Error adding listing: " + result.err);
+        toast({
+          title: "Error Adding Listing",
+          description: `Error: ${result.err}`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error adding listing:", error);

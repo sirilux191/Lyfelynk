@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Wallet() {
   const [icrc1_ledger_canister] = useCanister("icrc1_ledger_canister");
@@ -35,7 +36,12 @@ export default function Wallet() {
         console.error(result[key]);
       }
       if (key === "Ok") {
-        alert("Allowed to spend token");
+        //alert("Allowed to spend token");
+        toast({
+          title: "Success",
+          description: "Allowed to spend token",
+          variant: "success",
+        });
       }
     });
   };
@@ -79,7 +85,12 @@ export default function Wallet() {
         console.error(result[key]);
       }
       if (key === "ok") {
-        alert(result[key]);
+        //alert(result[key]);
+        toast({
+          title: "Success",
+          description: result[key],
+          variant: "default",
+        });
       }
     });
   };

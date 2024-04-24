@@ -10,6 +10,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useCanister } from "@connect2ic/react";
@@ -27,13 +28,28 @@ export function BuyDataFunc({ listingID, seller }) {
         seller
       );
       if (result.ok) {
-        alert("Purchase successful:", result.ok);
+        //alert("Purchase successful:", result.ok);
+        toast({
+          title: "Purchase successful",
+          description: "Your purchase has been completed.",
+          variant: "success",
+        });
         setOpen(false); //dialog closes
       } else {
-        alert("Purchase failed:", result.err);
+        //alert("Purchase failed:", result.err);
+        toast({
+          title: "Purchase Failed",
+          description: `Error: ${result.err}`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      alert("Error purchasing listing:", error);
+      //alert("Error purchasing listing:", error);
+      toast({
+        title: "Error",
+        description: `An error occurred: ${error}`,
+        variant: "default",
+      });
     }
   };
 
