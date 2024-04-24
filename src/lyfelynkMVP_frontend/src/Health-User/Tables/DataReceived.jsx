@@ -58,6 +58,7 @@ const columns = [
     header: "",
     cell: ({ row }) => (
       <DownloadFile
+        uniqueID={row.original.uniqueID}
         data={row.original.dataToDownload}
         title={row.original.title}
         format={row.original.format}
@@ -81,6 +82,7 @@ export function DataReceivedTable() {
         const result = await lyfelynkMVP_backend.getSharedDataAssets();
         if (result.ok) {
           const dataAssets = result.ok.map(([id, asset]) => ({
+            uniqueID: id,
             timestamp: id.split("-")[1],
             title: asset.title,
             description: asset.description,
