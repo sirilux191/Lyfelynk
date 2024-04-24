@@ -154,8 +154,9 @@ const FileUpload = () => {
     setFile(null);
     setDescription("");
     setKeywords("");
-    setAuthor("");
+    setCategory("");
     setErrorMessage("");
+    setCsvData(null);
   };
 
   const handleCallCloudFunction = async () => {
