@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft } from "lucide-react";
 import FileUpload from "../../Functions/file-upload";
+import { toast } from "@/components/ui/use-toast";
 import { DatePicker } from "@/Functions/DatePicker";
 import { jsPDF } from "jspdf";
 import { useState } from "react";
@@ -91,12 +92,22 @@ export default function UploadContent() {
 
       Object.keys(result).forEach((key) => {
         if (key === "err") {
-          alert(result[key]);
+          //alert(result[key]);
+          toast({
+            title: "Upload Failed!",
+            description: `Error: ${result.err}`,
+            variant: "destructive",
+          });
           setLoading(false);
         }
         if (key === "ok") {
           console.log(result[key]);
-          alert("File uploaded successfully");
+          //alert("File uploaded successfully");
+          toast({
+            title: "File Uploaded Successfully",
+            description: "",
+            variant: "success",
+          });
           setLoading(false);
         }
       });
