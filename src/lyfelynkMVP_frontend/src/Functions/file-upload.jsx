@@ -306,7 +306,7 @@ const FileUpload = () => {
       )}
 
       {csvData && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto bg-muted rounded-lg p-2 ">
           <table>
             <tbody>
               {csvData.map((row, rowIndex) => (
@@ -326,7 +326,7 @@ const FileUpload = () => {
 
 const CloudFunctionCallButton = ({ handleCallCloudFunction }) => (
   <Button variant="outline" onClick={handleCallCloudFunction}>
-    Show File
+    Display File
   </Button>
 );
 
