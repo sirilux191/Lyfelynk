@@ -11,7 +11,6 @@
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\""
   },
   "dependencies": {
-    "ic-vetkd-utils": "ic-vetkd-utils-0.1.0.tgz",
     "@connect2ic/core": "^0.2.0-beta.24",
     "@connect2ic/react": "^0.2.0-beta.24",
     "@dfinity/agent": "^0.15.7",
@@ -33,6 +32,7 @@
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.0.0",
+    "ic-vetkd-utils": "ic-vetkd-utils-0.1.0.tgz",
     "jspdf": "^2.5.1",
     "lucide-react": "^0.363.0",
     "papaparse": "^5.4.1",
