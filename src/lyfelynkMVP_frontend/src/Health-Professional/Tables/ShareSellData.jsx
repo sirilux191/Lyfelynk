@@ -12,7 +12,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import formatDate from "date-fns/format";
 import { Button } from "@/components/ui/button";
-import LoadingScreen from "../../LoadingScreen";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -32,7 +32,7 @@ import { SellDataFunc } from "@/Functions/SellData";
 import { ShareDataFunc } from "@/Functions/ShareData";
 import DownloadFile from "../../Functions/DownloadFile";
 import { useCanister } from "@connect2ic/react";
-
+import LoadingScreen from "../../LoadingScreen";
 const columns = [
   {
     accessorKey: "title",
@@ -59,7 +59,7 @@ const columns = [
     header: "",
     cell: ({ row }) => (
       <DownloadFile
-        data={row.original.dataToDownload}
+        uniqueID={row.original.userID + "-" + row.original.timestamp}
         title={row.original.title}
         format={row.original.format}
       />
@@ -89,14 +89,15 @@ export function ShareSellTable() {
   useEffect(() => {
     const fetchUserDataAssets = async () => {
       try {
+        const userId = await lyfelynkMVP_backend.getID();
         const result = await lyfelynkMVP_backend.getUserDataAssets();
         if (result.ok) {
           const dataAssets = result.ok.map(([timestamp, asset]) => ({
+            userID: userId.ok,
             timestamp,
             title: asset.title,
             description: asset.description,
             format: asset.metadata.format,
-            dataToDownload: asset.data,
           }));
           setData(dataAssets);
           setLoading(false);

@@ -4,8 +4,11 @@ import { Download } from "lucide-react";
 import { useCanister } from "@connect2ic/react";
 import * as vetkd from "ic-vetkd-utils";
 
-const DownloadFile = ({ uniqueID, data, format, title }) => {
+import { useState } from "react";
+
+const DownloadFile = ({ uniqueID, format, title }) => {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
+  const [downloading, setDownloading] = useState(false);
 
   function downloadData(file) {
     const url = URL.createObjectURL(file);
@@ -41,7 +44,8 @@ const DownloadFile = ({ uniqueID, data, format, title }) => {
 
   const downloadFile = async () => {
     try {
-      console.log(uniqueID);
+      setDownloading(true);
+
       // Step 1: Retrieve the encrypted key using encrypted_symmetric_key_for_dataAsset
       const seed = window.crypto.getRandomValues(new Uint8Array(32));
       const tsk = new vetkd.TransportSecretKey(seed);
@@ -77,8 +81,9 @@ const DownloadFile = ({ uniqueID, data, format, title }) => {
       );
       console.log(aesGCMKey);
       // Step 2: Decrypt the data using the AES-GCM key
+      const result = await lyfelynkMVP_backend.downloadDataAssetData(uniqueID);
       const decryptedData = await aes_gcm_decrypt(
-        new Uint8Array(data),
+        new Uint8Array(result.ok),
         aesGCMKey
       );
 
@@ -92,6 +97,7 @@ const DownloadFile = ({ uniqueID, data, format, title }) => {
 
       // Step 4: Download the decrypted file
       downloadData(decryptedFile);
+      setDownloading(false);
     } catch (error) {
       console.error("Error downloading file:", error);
       alert("Failed to download the file. Please try again.");
@@ -102,6 +108,7 @@ const DownloadFile = ({ uniqueID, data, format, title }) => {
     <Button
       className="p-2 text-white"
       onClick={downloadFile}
+      disabled={downloading}
     >
       <Download />
     </Button>

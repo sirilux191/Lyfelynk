@@ -18,11 +18,12 @@ import { toast } from "@/components/ui/use-toast";
 export function ShareDataFunc({ assetID }) {
   const [userId, setUserId] = useState("");
   const [open, setOpen] = useState(false); // Managing dialog's open state
-
+  const [sharing, setSharing] = useState(false);
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
   const handleShare = async () => {
     try {
+      setSharing(true);
       const result = await lyfelynkMVP_backend.grantDataAccess(userId, assetID);
       if (result.ok) {
         //alert("Access granted successfully");
@@ -31,9 +32,11 @@ export function ShareDataFunc({ assetID }) {
           description: "User has been granted access to the data.",
           variant: "success",
         });
+        setSharing(false);
         setOpen(false); //dialog closes
       } else {
         //alert("Error granting access: " + result.err);
+        setSharing(false);
         toast({
           title: "Error Granting Access",
           description: `Error: ${result.err}`,
@@ -46,9 +49,18 @@ export function ShareDataFunc({ assetID }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}
+    >
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setOpen(true)}>Share</Button>
+        <Button
+          variant="outline"
+          onClick={() => setOpen(true)}
+          disabled={sharing}
+        >
+          Share
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -75,7 +87,12 @@ export function ShareDataFunc({ assetID }) {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleShare}>Send</Button>
+          <Button
+            onClick={handleShare}
+            disabled={sharing}
+          >
+            Send
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

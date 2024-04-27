@@ -60,7 +60,6 @@ const columns = [
     cell: ({ row }) => (
       <DownloadFile
         uniqueID={row.original.userID + "-" + row.original.timestamp}
-        data={row.original.dataToDownload}
         title={row.original.title}
         format={row.original.format}
       />
@@ -99,7 +98,6 @@ export function ShareSellTable() {
             title: asset.title,
             description: asset.description,
             format: asset.metadata.format,
-            dataToDownload: asset.data,
           }));
           setData(dataAssets);
           setLoading(false);

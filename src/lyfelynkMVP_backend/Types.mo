@@ -55,6 +55,12 @@ module Types {
         metadata : Metadata;
     };
 
+    public type DataAssetInfo = {
+        title : Text;
+        description : Text;
+        metadata : Metadata;
+    };
+
     public type sharedActivityInfo = {
         assetID : Text;
         usedSharedTo : Text;

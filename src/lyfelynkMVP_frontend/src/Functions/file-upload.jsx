@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { CircleX } from "lucide-react";
 import { useCanister } from "@connect2ic/react";
 import LoadingScreen from "../LoadingScreen";
+import { toast } from "@/components/ui/use-toast";
+
+import * as vetkd from "ic-vetkd-utils";
 
 const FileUpload = () => {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
@@ -73,9 +76,9 @@ const FileUpload = () => {
       );
       return false;
     }
-    if (fileSizeMB > 1.5) {
+    if (fileSizeMB > 10) {
       setErrorMessage(
-        "File size is larger than 1.5 MB. Please select a smaller file."
+        "File size is larger than 10 MB. Please select a smaller file."
       );
       return false;
     }
@@ -111,13 +114,85 @@ const FileUpload = () => {
 
   const handleUpload = async () => {
     if (file) {
-      // Convert the file into ArrayBuffer
       setLoading(true);
+
+      // Step 1: Upload/link an empty file to get a unique ID
+      const emptyDataAsset = {
+        title: "Empty File",
+        description: "Placeholder for encryption",
+        data: [],
+        metadata: {
+          category: "",
+          tags: [],
+          format: "empty",
+        },
+      };
+
+      const result = await lyfelynkMVP_backend.linkHealthData(emptyDataAsset);
+      let uniqueID = "";
+
+      Object.keys(result).forEach((key) => {
+        if (key === "err") {
+          alert(result[key]);
+          setLoading(false);
+          return;
+        }
+        if (key === "ok") {
+          uniqueID = result[key];
+        }
+      });
+
+      if (!uniqueID) {
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Fetch the encrypted key using encrypted_symmetric_key_for_dataAsset
+      const seed = window.crypto.getRandomValues(new Uint8Array(32));
+      const tsk = new vetkd.TransportSecretKey(seed);
+      const encryptedKeyResult =
+        await lyfelynkMVP_backend.encrypted_symmetric_key_for_dataAsset(
+          uniqueID,
+          Object.values(tsk.public_key())
+        );
+
+      let encryptedKey = "";
+
+      Object.keys(encryptedKeyResult).forEach((key) => {
+        if (key === "err") {
+          alert(encryptedKeyResult[key]);
+          setLoading(false);
+          return;
+        }
+        if (key === "ok") {
+          encryptedKey = encryptedKeyResult[key];
+        }
+      });
+
+      if (!encryptedKey) {
+        setLoading(false);
+        return;
+      }
+
+      const pkBytesHex =
+        await lyfelynkMVP_backend.symmetric_key_verification_key();
+      console.log(pkBytesHex);
+      console.log(encryptedKey);
+      const aesGCMKey = tsk.decrypt_and_hash(
+        hex_decode(encryptedKey),
+        hex_decode(pkBytesHex),
+        new TextEncoder().encode(uniqueID),
+        32,
+        new TextEncoder().encode("aes-256-gcm")
+      );
+      console.log(aesGCMKey);
+      // Step 3: Encrypt the user's file using the AES-GCM key
       const fileReader = new FileReader();
       fileReader.onload = async () => {
         const arrayBuffer = fileReader.result;
         const uint8Array = new Uint8Array(arrayBuffer);
-        console.log(uint8Array);
+        const encryptedData = await aes_gcm_encrypt(uint8Array, aesGCMKey);
+
         const metadata = {
           category: category,
           tags: [keywords],
@@ -127,20 +202,28 @@ const FileUpload = () => {
         const dataAsset = {
           title: file.file.name,
           description: description,
-          data: Object.values(uint8Array),
+          data: Object.values(encryptedData),
           metadata: metadata,
         };
 
-        const result = await lyfelynkMVP_backend.linkHealthData(dataAsset);
+        // Step 4: Update the data asset with the encrypted file
+        const updateResult = await lyfelynkMVP_backend.updateDataAsset(
+          uniqueID.split("-")[1],
+          dataAsset
+        );
 
-        Object.keys(result).forEach((key) => {
+        Object.keys(updateResult).forEach((key) => {
           if (key === "err") {
-            alert(result[key]);
+            alert(updateResult[key]);
             setLoading(false);
           }
           if (key === "ok") {
-            console.log(result[key]);
-            alert("File uploaded successfully");
+            // alert("File uploaded successfully");
+            toast({
+              title: "Success",
+              description: updateResult[key],
+              variant: "success",
+            });
             setLoading(false);
           }
         });
@@ -148,6 +231,33 @@ const FileUpload = () => {
       fileReader.readAsArrayBuffer(file.file);
     }
   };
+
+  const aes_gcm_encrypt = async (data, rawKey) => {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const aes_key = await window.crypto.subtle.importKey(
+      "raw",
+      rawKey,
+      "AES-GCM",
+      false,
+      ["encrypt"]
+    );
+    const ciphertext_buffer = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      aes_key,
+      data
+    );
+    const ciphertext = new Uint8Array(ciphertext_buffer);
+    const iv_and_ciphertext = new Uint8Array(iv.length + ciphertext.length);
+    iv_and_ciphertext.set(iv, 0);
+    iv_and_ciphertext.set(ciphertext, iv.length);
+    return iv_and_ciphertext;
+  };
+  // const hex_encode = (bytes) =>
+  //   bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "");
+  const hex_decode = (hexString) =>
+    Uint8Array.from(
+      hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+    );
 
   const handleRemoveFile = () => {
     setFile(null);

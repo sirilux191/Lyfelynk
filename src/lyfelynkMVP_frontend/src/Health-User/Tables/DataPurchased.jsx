@@ -67,7 +67,6 @@ const columns = [
     cell: ({ row }) => (
       <DownloadFile
         uniqueID={row.original.assetID}
-        data={row.original.dataAsset.data}
         title={row.original.dataAsset.title}
         format={row.original.dataAsset.metadata.format}
       />

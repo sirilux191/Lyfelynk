@@ -19,26 +19,27 @@ import Hex "utility/Hex";
 
 actor LyfeLynk {
 
-  let admin = Principal.fromText("e5s2y-wkvcn-fze3a-a2dwf-5iz4d-iv3fb-nl4qb-7pezr-wepwa-pua6f-xqe");
-  let healthUserIDMap = Map.new<Principal, Types.HealthIDUser>();
-  let healthProfessionalIDMap = Map.new<Principal, Types.HealthIDProfessional>();
-  let healthFacilityIDMap = Map.new<Principal, Types.HealthIDFacility>();
+  stable var admin = Principal.fromText("e5s2y-wkvcn-fze3a-a2dwf-5iz4d-iv3fb-nl4qb-7pezr-wepwa-pua6f-xqe");
+  stable var healthUserIDMap = Map.new<Principal, Types.HealthIDUser>();
+  stable var healthProfessionalIDMap = Map.new<Principal, Types.HealthIDProfessional>();
+  stable var healthFacilityIDMap = Map.new<Principal, Types.HealthIDFacility>();
 
-  let principalIDMap = Map.new<Principal, Text>(); //Map of Principal of User with Health ID
-  let idPrincipalMap = Map.new<Text, Principal>(); //Map of Health ID of User with Principal
+  stable var principalIDMap = Map.new<Principal, Text>(); //Map of Principal of User with Health ID
+  stable var idPrincipalMap = Map.new<Text, Principal>(); //Map of Health ID of User with Principal
 
-  let dataAssetStorage = Map.new<Text, Map.Map<Text, Types.DataAsset>>(); //UserID <---> Timestamp <---> DataAsset
-  let dataAccessTP = Map.new<Text, [Principal]>(); //AssetIDUnique <---> user
-  let dataAccessPT = Map.new<Principal, [Text]>(); //User <---> AssetIDUnique
-  let sharedFileList = Map.new<Principal, [Types.sharedActivityInfo]>();
-  let purchasedDataAssetList = Map.new<Principal, [Types.purchasedInfo]>();
+  stable var dataAssetStorage = Map.new<Text, Map.Map<Text, Types.DataAsset>>(); //UserID <---> Timestamp <---> DataAsset
+  stable var dataAccessTP = Map.new<Text, [Principal]>(); //AssetIDUnique <---> user
+  stable var dataAccessPT = Map.new<Principal, [Text]>(); //User <---> AssetIDUnique
+  stable var sharedFileList = Map.new<Principal, [Types.sharedActivityInfo]>();
+  stable var purchasedDataAssetList = Map.new<Principal, [Types.purchasedInfo]>();
 
-  let tokenRequestMap = Map.new<Principal, Types.TokenRequestAmounts>();
-  var userRegistrationNumberCount : Nat = 10000000000000;
-  var profRegistrationNumberCount : Nat = 100000000000;
-  var facilityRegistrationNumberCount : Nat = 1000000000;
+  stable var tokenRequestMap = Map.new<Principal, Types.TokenRequestAmounts>();
+  stable var userRegistrationNumberCount : Nat = 10000000000000;
+  stable var profRegistrationNumberCount : Nat = 100000000000;
+  stable var facilityRegistrationNumberCount : Nat = 1000000000;
 
-  let userListings = Map.new<Principal, Map.Map<Text, Types.Listing>>();
+  stable var userListings = Map.new<Principal, Map.Map<Text, Types.Listing>>();
+  stable var numberOfTransactions = 0;
 
   //AUTHENTICATION FUNCTIONS
   public shared query ({ caller }) func whoami() : async Text {
@@ -49,7 +50,7 @@ actor LyfeLynk {
     return Principal.toText(Principal.fromActor(LyfeLynk));
   };
 
-  public shared ({ caller }) func isRegistered() : async Text {
+  public shared query ({ caller }) func isRegistered() : async Text {
     if (Map.has(healthFacilityIDMap, phash, caller)) {
       return "Facility";
     } else if (Map.has(healthProfessionalIDMap, phash, caller)) {
@@ -64,7 +65,7 @@ actor LyfeLynk {
   public shared query ({ caller }) func getID() : async Result.Result<Text, Text> {
     switch (Map.get(principalIDMap, phash, caller)) {
       case (?value) { #ok(value) };
-      case (null) { #err("Sorry looks ur not registered") };
+      case (null) { #err("Sorry looks your are not registered") };
     };
   };
 
@@ -77,7 +78,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func createUser(demoInfo : Blob, basicHealthPara : Blob, bioMData : ?Blob, familyData : ?Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't register, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
     if (Map.has(healthUserIDMap, phash, caller) or Map.has(healthProfessionalIDMap, phash, caller) or Map.has(healthFacilityIDMap, phash, caller)) {
       return #err("You are already registered in one of the categories. Cannot register as a Health User.");
@@ -102,21 +103,21 @@ actor LyfeLynk {
     #ok(Nat.toText(userRegistrationNumberCount));
   };
 
-  public shared ({ caller }) func readUser() : async Result.Result<Types.HealthIDUser, Text> {
+  public shared query ({ caller }) func readUser() : async Result.Result<Types.HealthIDUser, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't register, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthUserIDMap, phash, caller);
     switch (readResult) {
       case (?value) { #ok(value) };
-      case (null) { #err("Your not registered as Health User") };
+      case (null) { #err("You are not registered as Health User") };
     };
   };
 
   public shared ({ caller }) func updateUser(demoInfo : Blob, basicHealthPara : Blob, bioMData : ?Blob, familyData : ?Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't update, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthUserIDMap, phash, caller);
@@ -168,7 +169,7 @@ actor LyfeLynk {
   // CRUD OPERATIONS PROFESSIONAL ID
   public shared ({ caller }) func createProfessional(demoInfo : Blob, occupationInfo : Blob, certificationInfo : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't register, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     if (Map.has(healthUserIDMap, phash, caller) or Map.has(healthProfessionalIDMap, phash, caller) or Map.has(healthFacilityIDMap, phash, caller)) {
@@ -191,12 +192,12 @@ actor LyfeLynk {
     Map.set(healthProfessionalIDMap, phash, caller, tempID);
     Map.set(principalIDMap, phash, caller, Nat.toText(profRegistrationNumberCount));
     Map.set(idPrincipalMap, thash, Nat.toText(profRegistrationNumberCount), caller);
-    #ok("Your unique Health Professional ID is:" # Nat.toText(profRegistrationNumberCount));
+    #ok(Nat.toText(profRegistrationNumberCount));
   };
 
-  public shared ({ caller }) func readProfessional() : async Result.Result<Types.HealthIDProfessional, Text> {
+  public shared query ({ caller }) func readProfessional() : async Result.Result<Types.HealthIDProfessional, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't register, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthProfessionalIDMap, phash, caller);
@@ -210,7 +211,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func updateProfessional(demoInfo : Blob, occupationInfo : Blob, certificationInfo : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't update, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthProfessionalIDMap, phash, caller);
@@ -239,7 +240,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func deleteProfessional() : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't delete, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthProfessionalIDMap, phash, caller);
@@ -259,7 +260,7 @@ actor LyfeLynk {
   // CRUD OPERATIONS FACILITY ID
   public shared ({ caller }) func createFacility(demoInfo : Blob, servicesOfferedInfo : Blob, licenseInfo : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't register, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     if (Map.has(healthUserIDMap, phash, caller) or Map.has(healthProfessionalIDMap, phash, caller) or Map.has(healthFacilityIDMap, phash, caller)) {
@@ -282,12 +283,12 @@ actor LyfeLynk {
     Map.set(healthFacilityIDMap, phash, caller, tempID);
     Map.set(principalIDMap, phash, caller, Nat.toText(facilityRegistrationNumberCount));
     Map.set(idPrincipalMap, thash, Nat.toText(facilityRegistrationNumberCount), caller);
-    #ok("Your unique Health Facility ID is:" # Nat.toText(facilityRegistrationNumberCount));
+    #ok(Nat.toText(facilityRegistrationNumberCount));
   };
 
-  public shared ({ caller }) func readFacility() : async Result.Result<Types.HealthIDFacility, Text> {
+  public shared query ({ caller }) func readFacility() : async Result.Result<Types.HealthIDFacility, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't register, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthFacilityIDMap, phash, caller);
@@ -299,7 +300,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func updateFacility(demoInfo : Blob, servicesOfferedInfo : Blob, licenseInfo : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't update, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthFacilityIDMap, phash, caller);
@@ -328,7 +329,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func deleteFacility() : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't delete, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let readResult = Map.get(healthFacilityIDMap, phash, caller);
@@ -348,7 +349,7 @@ actor LyfeLynk {
   // Link health data with user's health ID
   public shared ({ caller }) func linkHealthData(healthData : Types.DataAsset) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't link health data, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let userIDResult = Map.get(principalIDMap, phash, caller);
@@ -432,11 +433,105 @@ actor LyfeLynk {
       };
     };
   };
+  // Function to upload/link data on behalf of a user
+  public shared ({ caller }) func uploadDataForUser(userID : Text, healthData : Types.DataAsset) : async Result.Result<Text, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please login with wallet or internet identity");
+    };
 
-  public shared ({ caller }) func getUserDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
+    // Check if the caller is a registered professional or facility
+    let callerType = await isRegistered();
+    if (callerType != "Professional" and callerType != "Facility") {
+      return #err("Only registered professionals or facilities can upload data on behalf of users");
+    };
+
+    // Check if the provided userID is valid
+    let userPrincipal = Map.get(idPrincipalMap, thash, userID);
+    switch (userPrincipal) {
+      case (?user) {
+        let timestamp = Int.toText(Time.now());
+        let uniqueID = userID # "-" # timestamp;
+
+        // Link the health data to the user's health ID
+        let healthDataMap = Map.get(dataAssetStorage, thash, userID);
+        switch (healthDataMap) {
+          case (?existingDataMap) {
+            Map.set(existingDataMap, thash, timestamp, healthData);
+            Map.set(dataAssetStorage, thash, userID, existingDataMap);
+
+            // Update dataAccessPT map
+            let tempArray1 = Map.get(dataAccessPT, phash, user);
+            switch (tempArray1) {
+              case (?array) {
+                let buff = Buffer.fromArray<Text>(array);
+                buff.add(uniqueID);
+                Map.set(dataAccessPT, phash, user, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessPT, phash, user, [uniqueID]);
+              };
+            };
+
+            // Update dataAccessTP map
+            let tempArray2 = Map.get(dataAccessTP, thash, uniqueID);
+            switch (tempArray2) {
+              case (?array) {
+                let buff = Buffer.fromArray<Principal>(array);
+                buff.add(user);
+                Map.set(dataAccessTP, thash, uniqueID, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessTP, thash, uniqueID, [user]);
+              };
+            };
+
+            #ok(uniqueID);
+          };
+          case (null) {
+            let newDataMap = Map.new<Text, Types.DataAsset>();
+            Map.set(newDataMap, thash, timestamp, healthData);
+            Map.set(dataAssetStorage, thash, userID, newDataMap);
+
+            // Update dataAccessPT map
+            let tempArray1 = Map.get(dataAccessPT, phash, user);
+            switch (tempArray1) {
+              case (?array) {
+                let buff = Buffer.fromArray<Text>(array);
+                buff.add(uniqueID);
+                Map.set(dataAccessPT, phash, user, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessPT, phash, user, [uniqueID]);
+              };
+            };
+
+            // Update dataAccessTP map
+            let tempArray2 = Map.get(dataAccessTP, thash, uniqueID);
+            switch (tempArray2) {
+              case (?array) {
+                let buff = Buffer.fromArray<Principal>(array);
+                buff.add(user);
+                Map.set(dataAccessTP, thash, uniqueID, Buffer.toArray(buff));
+              };
+              case (null) {
+                Map.set(dataAccessTP, thash, uniqueID, [user]);
+              };
+            };
+
+            #ok(uniqueID);
+          };
+        };
+      };
+      case (null) {
+        #err("Invalid user ID");
+      };
+    };
+  };
+
+  public shared query ({ caller }) func getUserDataAssets() : async Result.Result<[(Text, Types.DataAssetInfo)], Text> {
 
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access data assets. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let userID = Map.get(principalIDMap, phash, caller);
@@ -461,7 +556,7 @@ actor LyfeLynk {
   };
   public shared ({ caller }) func updateDataAsset(timestamp : Text, updatedData : Types.DataAsset) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't update data assets, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let userID = Map.get(principalIDMap, phash, caller);
@@ -494,7 +589,7 @@ actor LyfeLynk {
   };
   public shared ({ caller }) func grantDataAccess(userID : Text, timestamp : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't grant access, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let userIDResult = Map.get(idPrincipalMap, thash, userID);
@@ -578,7 +673,7 @@ actor LyfeLynk {
   // Revoke access to a health data asset
   public shared ({ caller }) func revokeDataAccess(userID : Text, timestamp : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't revoke access, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
 
     let userIDResult = Map.get(idPrincipalMap, thash, userID);
@@ -651,9 +746,9 @@ actor LyfeLynk {
     };
   };
 
-  public shared ({ caller }) func getSharedFileList() : async Result.Result<[Types.sharedActivityInfo], Text> {
+  public shared query ({ caller }) func getSharedFileList() : async Result.Result<[Types.sharedActivityInfo], Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous persons can't revoke access, please login with wallet or internet identity");
+      return #err("Please login with wallet or internet identity");
     };
     let list = Map.get(sharedFileList, phash, caller);
     switch (list) {
@@ -666,9 +761,9 @@ actor LyfeLynk {
     };
   };
 
-  public shared ({ caller }) func getSharedDataAssets() : async Result.Result<[(Text, Types.DataAsset)], Text> {
+  public shared query ({ caller }) func getSharedDataAssets() : async Result.Result<[(Text, Types.DataAssetInfo)], Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access shared data assets. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let userID = Map.get(principalIDMap, phash, caller);
@@ -725,7 +820,7 @@ actor LyfeLynk {
     timestamp : Text,
   ) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot add listings. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let userID = Map.get(principalIDMap, phash, caller);
@@ -781,10 +876,10 @@ actor LyfeLynk {
       };
     };
   };
-  ///Check
+
   public shared ({ caller }) func deleteListingByAssetID(listingID : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot delete listings. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let listings = Map.get(userListings, phash, caller);
@@ -827,9 +922,9 @@ actor LyfeLynk {
     return #ok(Buffer.toArray(allListings));
   };
 
-  public shared ({ caller }) func getUserListings() : async Result.Result<[Types.Listing], Text> {
+  public shared query ({ caller }) func getUserListings() : async Result.Result<[Types.Listing], Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access user listings. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let listings = Map.get(userListings, phash, caller);
@@ -859,7 +954,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func purchaseListing(listingID : Text, sellerText : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot purchase listings. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let buyerID = Map.get(principalIDMap, phash, caller);
@@ -980,7 +1075,7 @@ actor LyfeLynk {
                             Map.set(purchasedDataAssetList, phash, caller, [purchasedInformation]);
                           };
                         };
-
+                        numberOfTransactions := numberOfTransactions + 1;
                         #ok("Listing purchased successfully. Access granted to the buyer.");
                       };
                       case (null) {
@@ -1008,9 +1103,9 @@ actor LyfeLynk {
       };
     };
   };
-  public shared ({ caller }) func getPurchasedDataAssets() : async Result.Result<[(Types.DataAsset, Types.purchasedInfo)], Text> {
+  public shared query ({ caller }) func getPurchasedDataAssets() : async Result.Result<[(Types.DataAssetInfo, Types.purchasedInfo)], Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let purchasedInfoList = Buffer.Buffer<(Types.DataAsset, Types.purchasedInfo)>(0);
@@ -1057,7 +1152,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func requestForTokens(amount : Nat) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let previousStats = Map.get(tokenRequestMap, phash, caller);
@@ -1086,7 +1181,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func requestApproveReject(user : Principal, amount : Nat) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access purchased information. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
     if (caller != admin) {
       return #err("you are not admin");
@@ -1155,7 +1250,7 @@ actor LyfeLynk {
 
   public shared ({ caller }) func encrypted_symmetric_key_for_dataAsset(uniqueID : Text, encryption_public_key : Blob) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
-      return #err("Anonymous principals cannot access data assets. Please log in with a wallet or internet identity.");
+      return #err("Please log in with a wallet or internet identity.");
     };
 
     let accessList = Map.get(dataAccessTP, thash, uniqueID);
@@ -1185,4 +1280,56 @@ actor LyfeLynk {
     #ok(Hex.encode(Blob.toArray(encrypted_key)));
   };
   //VetKey Section
+  //
+  public shared query ({ caller }) func downloadDataAssetData(assetID : Text) : async Result.Result<Blob, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please log in with a wallet or internet identity.");
+    };
+
+    let userID = Map.get(principalIDMap, phash, caller);
+
+    switch (userID) {
+      case (?id) {
+        let sharedAssetIDs = Map.get(dataAccessPT, phash, caller);
+        switch (sharedAssetIDs) {
+          case (?assetIDs) {
+            let found = Array.find<Text>(assetIDs, func(a) { a == assetID });
+            if (found != null) {
+              let parts = Text.split(assetID, #text("-"));
+              switch (parts.next(), parts.next(), parts.next()) {
+                case (?ownerID, ?timestamp, null) {
+
+                  let dataAssetMap = Map.get(dataAssetStorage, thash, ownerID);
+                  switch (dataAssetMap) {
+                    case (?assetMap) {
+                      let dataAsset = Map.get(assetMap, thash, timestamp);
+                      switch (dataAsset) {
+                        case (?asset) {
+                          return #ok(asset.data);
+                        };
+                        case (null) {};
+                      };
+                    };
+                    case (null) {};
+                  };
+
+                };
+                case (_) {
+                  return #err("Invalid assetID format.");
+                };
+              };
+            };
+            return #err("You don't have access to the requested data asset.");
+          };
+          case (null) {
+            return #err("No data assets have been shared with you.");
+          };
+        };
+      };
+      case (null) {
+        return #err("Caller is not a registered user.");
+      };
+    };
+  };
+  //
 };

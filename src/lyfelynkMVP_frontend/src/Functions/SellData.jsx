@@ -20,11 +20,13 @@ export function SellDataFunc({ assetID }) {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [selling, setSelling] = useState(false);
   const [open, setOpen] = useState(false); // Managing dialog's open state
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
-  const handleSaveChanges = async () => {
+  const handleSell = async () => {
     try {
+      setSelling(true);
       const result = await lyfelynkMVP_backend.addListing(
         title,
         description,
@@ -39,9 +41,11 @@ export function SellDataFunc({ assetID }) {
           description: "Your listing has been successfully created.",
           variant: "success",
         });
+        setSelling(false);
         setOpen(false); //dialog closes
       } else {
         //alert("Error adding listing: " + result.err);
+        setSelling(false);
         toast({
           title: "Error Adding Listing",
           description: `Error: ${result.err}`,
@@ -54,9 +58,17 @@ export function SellDataFunc({ assetID }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}
+    >
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}>Sell</Button>
+        <Button
+          onClick={() => setOpen(true)}
+          disabled={selling}
+        >
+          Sell
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -125,7 +137,12 @@ export function SellDataFunc({ assetID }) {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSaveChanges}>Confirm</Button>
+          <Button
+            onClick={handleSell}
+            disabled={selling}
+          >
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
