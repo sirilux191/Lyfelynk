@@ -76,9 +76,9 @@ const FileUpload = () => {
       );
       return false;
     }
-    if (fileSizeMB > 10) {
+    if (fileSizeMB > 1.9) {
       setErrorMessage(
-        "File size is larger than 10 MB. Please select a smaller file."
+        "File size is larger than 2 MB. Please select a smaller file."
       );
       return false;
     }
