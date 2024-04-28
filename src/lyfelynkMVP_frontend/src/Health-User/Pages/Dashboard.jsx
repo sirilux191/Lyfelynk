@@ -2,6 +2,8 @@ import { CarouselItem, CarouselContent, Carousel } from "@/components/ui/carouse
 import { Card } from "@/components/ui/card"
 import RecentActivityTable from "../Tables/RecentActivityData"
 import DataPurchasedTable from "../Tables/DataPurchased"
+import HealthAnalytics from "../../Functions/healthanalytics"
+import { HeartPulse } from "lucide-react"
 
 export default function DashboardContent() {
   return (
@@ -55,9 +57,11 @@ export default function DashboardContent() {
         </div>
 
         <section className="py-4">
-          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-
+          <div className="flex items-center space-x-2 pb-6">
+            <HeartPulse className="w-8 h-8"/>
+            <h1 className="text-2xl font-bold text-foreground">Health Analytics</h1>
           </div>
+          <HealthAnalytics/>
         </section>
       </div>
     </div>

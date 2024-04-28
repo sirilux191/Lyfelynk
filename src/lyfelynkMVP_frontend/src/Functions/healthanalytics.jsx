@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
+import { Dna, Footprints, GlassWater, Heart, User, Weight } from 'lucide-react';
 
 function HealthAnalytics() {
   const [age, setAge] = useState('');
@@ -32,17 +34,78 @@ function HealthAnalytics() {
     return '2.7 liters';
   };
 
+  const getStatusColor = () => {
+    const status = getHealthStatus();
+    switch (status) {
+      case 'Underweight':
+        return 'bg-blue-400';
+      case 'Healthy':
+        return 'bg-green-500';
+      case 'Overweight':
+        return 'bg-yellow-400';
+      case 'Obese':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-200';
+    }
+  };
+
   return (
-    <div>
-      <h2>Health Analytics</h2>
-    
-      <h3>Analytics Results</h3>
-      <p>Age: {age}</p>
-      <p>Gender: {gender}</p>
-      <p>BMI: {calculateBMI()}</p>
-      <p>Health Status: {getHealthStatus()}</p>
-      <p>Recommended Daily Steps: {getRecommendedSteps()}</p>
-      <p>Recommended Daily Water Intake: {getRecommendedWaterIntake()}</p>
+    <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-8 space-y-0">
+          <CardTitle className="text-sm font-medium">Age</CardTitle>
+          <User className='w-4 h-4 text-gray-500'/>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{age}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-8 space-y-0">
+          <CardTitle className="text-sm font-medium">Gender</CardTitle>
+          <Dna className='w-4 h-4 text-gray-500'/>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{gender}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-8 space-y-0">
+          <CardTitle className="text-sm font-medium">BMI</CardTitle>
+          <Weight className='w-4 h-4 text-gray-500'/>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{calculateBMI()}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-8 space-y-0">
+          <CardTitle className="text-sm font-medium">Health Status</CardTitle>
+          <Heart className='w-4 h-4 text-gray-500'/>
+        </CardHeader>
+        <CardContent>
+          <div className={`text-2xl font-bold px-2 rounded-sm ${getStatusColor()}`}>{getHealthStatus()}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-8 space-y-0">
+          <CardTitle className="text-sm font-medium">Rec. Daily Steps</CardTitle>
+          <Footprints className='w-4 h-4 text-gray-500'/>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{getRecommendedSteps()}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-8 space-y-0">
+          <CardTitle className="text-sm font-medium">Rec. Daily Water Intake</CardTitle>
+          <GlassWater className='w-4 h-4 text-gray-500'/>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{getRecommendedWaterIntake()}</div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
