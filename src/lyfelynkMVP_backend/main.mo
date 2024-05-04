@@ -28,8 +28,8 @@ actor LyfeLynk {
   stable var idPrincipalMap = Map.new<Text, Principal>(); //Map of Health ID of User with Principal
 
   stable var dataAssetStorage = Map.new<Text, Map.Map<Text, Types.DataAsset>>(); //UserID <---> Timestamp <---> DataAsset
-  stable var dataAccessTP = Map.new<Text, [Principal]>(); //AssetIDUnique <---> user
-  stable var dataAccessPT = Map.new<Principal, [Text]>(); //User <---> AssetIDUnique
+  stable var dataAccessTP = Map.new<Text, [Principal]>(); //AssetIDUnique <---> [User]
+  stable var dataAccessPT = Map.new<Principal, [Text]>(); //User <---> [AssetIDUnique]
   stable var sharedFileList = Map.new<Principal, [Types.sharedActivityInfo]>();
   stable var purchasedDataAssetList = Map.new<Principal, [Types.purchasedInfo]>();
 
@@ -85,7 +85,7 @@ actor LyfeLynk {
     };
     let g = Source.Source();
     let uuid = UUID.toText(await g.new());
-    userRegistrationNumberCount := userRegistrationNumberCount +1;
+    userRegistrationNumberCount := userRegistrationNumberCount + 1;
     let tempIDData : Types.HealthIDUserData = {
       DemographicInformation = demoInfo;
       BasicHealthParameters = basicHealthPara;
@@ -137,7 +137,7 @@ actor LyfeLynk {
         };
 
         Map.set(healthUserIDMap, phash, caller, updatedID);
-        #ok("User health ID updated successfully");
+        #ok("User Health ID updated successfully");
       };
       case (null) {
         #err("You're not registered as a Health User");
@@ -156,7 +156,7 @@ actor LyfeLynk {
         Map.delete(healthUserIDMap, phash, caller);
         Map.delete(principalIDMap, phash, caller);
         Map.delete(idPrincipalMap, thash, value.IDNum);
-        #ok("User health ID deleted successfully");
+        #ok("User Health ID deleted successfully");
       };
       case (null) {
         #err("You're not registered as a Health User");
@@ -587,6 +587,7 @@ actor LyfeLynk {
       };
     };
   };
+
   public shared ({ caller }) func grantDataAccess(userID : Text, timestamp : Text) : async Result.Result<Text, Text> {
     if (Principal.isAnonymous(caller)) {
       return #err("Please login with wallet or internet identity");
@@ -1269,6 +1270,25 @@ actor LyfeLynk {
     let buf = Buffer.Buffer<Nat8>(32);
     buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(uniqueID))));
     let derivation_id = Blob.fromArray(Buffer.toArray(buf)); // prefix-free
+
+    let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
+      derivation_id;
+      public_key_derivation_path = Array.make(Text.encodeUtf8("symmetric_key"));
+      key_id = { curve = #bls12_381; name = "test_key_1" };
+      encryption_public_key;
+    });
+
+    #ok(Hex.encode(Blob.toArray(encrypted_key)));
+  };
+
+  public shared ({ caller }) func encrypted_symmetric_key_for_user(encryption_public_key : Blob) : async Result.Result<Text, Text> {
+    if (Principal.isAnonymous(caller)) {
+      return #err("Please log in with a wallet or internet identity.");
+    };
+
+    let buf = Buffer.Buffer<Nat8>(32);
+    buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(Principal.toText(caller)))));
+    let derivation_id = Blob.fromArray(Buffer.toArray(buf));
 
     let { encrypted_key } = await vetkd_system_api.vetkd_encrypted_key({
       derivation_id;

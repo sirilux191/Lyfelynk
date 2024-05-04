@@ -12,7 +12,7 @@ import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../../LoadingScreen";
-
+import * as vetkd from "ic-vetkd-utils";
 // Connect2ic: Import Connect2ic library to interact with the backend canister
 import { useCanister } from "@connect2ic/react";
 //
@@ -62,10 +62,54 @@ export default function RegisterPage1Content() {
     // Convert JSON strings to Uint8Array
     const demoInfoArray = new TextEncoder().encode(demoInfoJson);
     const basicHealthParaArray = new TextEncoder().encode(basicHealthParaJson);
+    // Step 2: Fetch the encrypted key using encrypted_symmetric_key_for_dataAsset
+    const seed = window.crypto.getRandomValues(new Uint8Array(32));
+    const tsk = new vetkd.TransportSecretKey(seed);
+    const encryptedKeyResult =
+      await lyfelynkMVP_backend.encrypted_symmetric_key_for_user(
+        Object.values(tsk.public_key())
+      );
 
+    let encryptedKey = "";
+
+    Object.keys(encryptedKeyResult).forEach((key) => {
+      if (key === "err") {
+        alert(encryptedKeyResult[key]);
+        setLoading(false);
+        return;
+      }
+      if (key === "ok") {
+        encryptedKey = encryptedKeyResult[key];
+      }
+    });
+
+    if (!encryptedKey) {
+      setLoading(false);
+      return;
+    }
+
+    const pkBytesHex =
+      await lyfelynkMVP_backend.symmetric_key_verification_key();
+    const principal = await lyfelynkMVP_backend.whoami();
+    console.log(pkBytesHex);
+    console.log(encryptedKey);
+    const aesGCMKey = tsk.decrypt_and_hash(
+      hex_decode(encryptedKey),
+      hex_decode(pkBytesHex),
+      new TextEncoder().encode(principal),
+      32,
+      new TextEncoder().encode("aes-256-gcm")
+    );
+    console.log(aesGCMKey);
+
+    const encryptedDataDemo = await aes_gcm_encrypt(demoInfoArray, aesGCMKey);
+    const encryptedDataBasicHealth = await aes_gcm_encrypt(
+      basicHealthParaArray,
+      aesGCMKey
+    );
     const result = await lyfelynkMVP_backend.createUser(
-      Object.values(demoInfoArray),
-      Object.values(basicHealthParaArray),
+      Object.values(encryptedDataDemo),
+      Object.values(encryptedDataBasicHealth),
       [],
       []
     );
@@ -91,6 +135,34 @@ export default function RegisterPage1Content() {
       }
     });
   };
+
+  const aes_gcm_encrypt = async (data, rawKey) => {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const aes_key = await window.crypto.subtle.importKey(
+      "raw",
+      rawKey,
+      "AES-GCM",
+      false,
+      ["encrypt"]
+    );
+    const ciphertext_buffer = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      aes_key,
+      data
+    );
+    const ciphertext = new Uint8Array(ciphertext_buffer);
+    const iv_and_ciphertext = new Uint8Array(iv.length + ciphertext.length);
+    iv_and_ciphertext.set(iv, 0);
+    iv_and_ciphertext.set(ciphertext, iv.length);
+    return iv_and_ciphertext;
+  };
+  // const hex_encode = (bytes) =>
+  //   bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "");
+  const hex_decode = (hexString) =>
+    Uint8Array.from(
+      hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+    );
+
   if (loading) {
     return <LoadingScreen />;
   }

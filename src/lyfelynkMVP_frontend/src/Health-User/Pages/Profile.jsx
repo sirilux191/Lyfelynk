@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { useCanister } from "@connect2ic/react";
 import { useState, useEffect } from "react";
 import LoadingScreen from "../../LoadingScreen";
-
+import * as vetkd from "ic-vetkd-utils";
+import { toast } from "@/components/ui/use-toast";
 export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [userData, setUserData] = useState(null);
@@ -26,7 +27,48 @@ export default function ProfileContent() {
   const [heartRate, setHeartRate] = useState("");
   const [pincode, setPincode] = useState("");
   const [loading, setLoading] = useState(false);
+  const aes_gcm_encrypt = async (data, rawKey) => {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const aes_key = await window.crypto.subtle.importKey(
+      "raw",
+      rawKey,
+      "AES-GCM",
+      false,
+      ["encrypt"]
+    );
+    const ciphertext_buffer = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      aes_key,
+      data
+    );
+    const ciphertext = new Uint8Array(ciphertext_buffer);
+    const iv_and_ciphertext = new Uint8Array(iv.length + ciphertext.length);
+    iv_and_ciphertext.set(iv, 0);
+    iv_and_ciphertext.set(ciphertext, iv.length);
+    return iv_and_ciphertext;
+  };
 
+  const aes_gcm_decrypt = async (encryptedData, rawKey) => {
+    const iv = encryptedData.slice(0, 12);
+    const ciphertext = encryptedData.slice(12);
+    const aes_key = await window.crypto.subtle.importKey(
+      "raw",
+      rawKey,
+      "AES-GCM",
+      false,
+      ["decrypt"]
+    );
+    const decrypted_buffer = await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      aes_key,
+      ciphertext
+    );
+    return new Uint8Array(decrypted_buffer);
+  };
+  const hex_decode = (hexString) =>
+    Uint8Array.from(
+      hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+    );
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -39,12 +81,64 @@ export default function ProfileContent() {
             BiometricData,
             FamilyInformation,
           } = MetaData;
+          // Step 1: Retrieve the encrypted key using encrypted_symmetric_key_for_dataAsset
+
+          const seed = window.crypto.getRandomValues(new Uint8Array(32));
+          const tsk = new vetkd.TransportSecretKey(seed);
+          const encryptedKeyResult =
+            await lyfelynkMVP_backend.encrypted_symmetric_key_for_user(
+              Object.values(tsk.public_key())
+            );
+
+          let encryptedKey = "";
+
+          Object.keys(encryptedKeyResult).forEach((key) => {
+            if (key === "err") {
+              alert(encryptedKeyResult[key]);
+              setLoading(false);
+              return;
+            }
+            if (key === "ok") {
+              encryptedKey = encryptedKeyResult[key];
+            }
+          });
+
+          if (!encryptedKey) {
+            setLoading(false);
+            return;
+          }
+
+          const pkBytesHex =
+            await lyfelynkMVP_backend.symmetric_key_verification_key();
+          const principal = await lyfelynkMVP_backend.whoami();
+          console.log(pkBytesHex);
+          console.log(encryptedKey);
+          const aesGCMKey = tsk.decrypt_and_hash(
+            hex_decode(encryptedKey),
+            hex_decode(pkBytesHex),
+            new TextEncoder().encode(principal),
+            32,
+            new TextEncoder().encode("aes-256-gcm")
+          );
+          console.log(aesGCMKey);
+          console.log(typeof DemographicInformation);
+          console.log(typeof BasicHealthParameters);
+          console.log(DemographicInformation);
+          console.log(BasicHealthParameters);
+          const decryptedDataDemo = await aes_gcm_decrypt(
+            new Uint8Array(DemographicInformation),
+            aesGCMKey
+          );
+          const decryptedDataBasicHealth = await aes_gcm_decrypt(
+            new Uint8Array(BasicHealthParameters),
+            aesGCMKey
+          );
 
           const parsedDemographicInfo = JSON.parse(
-            String.fromCharCode.apply(null, DemographicInformation)
+            String.fromCharCode.apply(null, decryptedDataDemo)
           );
           const parsedBasicHealthParams = JSON.parse(
-            String.fromCharCode.apply(null, BasicHealthParameters)
+            String.fromCharCode.apply(null, decryptedDataBasicHealth)
           );
           const parsedBiometricData =
             BiometricData.length > 0
@@ -117,19 +211,78 @@ export default function ProfileContent() {
       const basicHealthParaArray = new TextEncoder().encode(
         basicHealthParaJson
       );
+
+      // Step 2: Fetch the encrypted key using encrypted_symmetric_key_for_dataAsset
+      const seed = window.crypto.getRandomValues(new Uint8Array(32));
+      const tsk = new vetkd.TransportSecretKey(seed);
+      const encryptedKeyResult =
+        await lyfelynkMVP_backend.encrypted_symmetric_key_for_user(
+          Object.values(tsk.public_key())
+        );
+
+      let encryptedKey = "";
+
+      Object.keys(encryptedKeyResult).forEach((key) => {
+        if (key === "err") {
+          alert(encryptedKeyResult[key]);
+          setLoading(false);
+          return;
+        }
+        if (key === "ok") {
+          encryptedKey = encryptedKeyResult[key];
+        }
+      });
+
+      if (!encryptedKey) {
+        setLoading(false);
+        return;
+      }
+
+      const pkBytesHex =
+        await lyfelynkMVP_backend.symmetric_key_verification_key();
+      const principal = await lyfelynkMVP_backend.whoami();
+      console.log(pkBytesHex);
+      console.log(encryptedKey);
+      const aesGCMKey = tsk.decrypt_and_hash(
+        hex_decode(encryptedKey),
+        hex_decode(pkBytesHex),
+        new TextEncoder().encode(principal),
+        32,
+        new TextEncoder().encode("aes-256-gcm")
+      );
+      console.log(aesGCMKey);
+
+      const encryptedDataDemo = await aes_gcm_encrypt(demoInfoArray, aesGCMKey);
+      const encryptedDataBasicHealth = await aes_gcm_encrypt(
+        basicHealthParaArray,
+        aesGCMKey
+      );
       const result = await lyfelynkMVP_backend.updateUser(
-        Object.values(demoInfoArray),
-        Object.values(basicHealthParaArray),
+        Object.values(encryptedDataDemo),
+        Object.values(encryptedDataBasicHealth),
         [],
         []
       );
-      if (result.ok) {
-        alert("User health ID updated successfully");
-        setLoading(false);
-      } else {
-        alert("Error updating user data:" + result.err);
-        setLoading(false);
-      }
+      Object.keys(result).forEach((key) => {
+        if (key == "err") {
+          //alert(result[key]);
+          toast({
+            title: "Error",
+            description: result[key],
+            variant: "destructive",
+          });
+          setLoading(false);
+        }
+        if (key == "ok") {
+          //alert(result[key]);
+          toast({
+            title: "Success",
+            description: result[key],
+            variant: "success",
+          });
+          setLoading(false);
+        }
+      });
     } catch (error) {
       console.error("Error updating user data:", error);
     }

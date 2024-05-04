@@ -1,9 +1,11 @@
-import { CarouselItem, CarouselContent, Carousel } from "@/components/ui/carousel"
-import { Card } from "@/components/ui/card"
-import RecentActivityTable from "../Tables/RecentActivityData"
-import DataPurchasedTable from "../Tables/DataPurchased"
-import HealthAnalytics from "../../Functions/healthanalytics"
-import { HeartPulse } from "lucide-react"
+import {
+  CarouselItem,
+  CarouselContent,
+  Carousel,
+} from "@/components/ui/carousel";
+
+import HealthAnalytics from "../../Functions/healthanalytics";
+import { HeartPulse } from "lucide-react";
 
 export default function DashboardContent() {
   return (
@@ -58,12 +60,14 @@ export default function DashboardContent() {
 
         <section className="py-4">
           <div className="flex items-center space-x-2 pb-6">
-            <HeartPulse className="w-8 h-8"/>
-            <h1 className="text-2xl font-bold text-foreground">Health Analytics</h1>
+            <HeartPulse className="w-8 h-8" />
+            <h1 className="text-2xl font-bold text-foreground">
+              Health Analytics
+            </h1>
           </div>
-          <HealthAnalytics/>
+          <HealthAnalytics />
         </section>
       </div>
     </div>
-  )
+  );
 }
