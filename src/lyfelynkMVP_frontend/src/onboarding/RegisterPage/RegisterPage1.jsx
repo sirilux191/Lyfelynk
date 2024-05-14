@@ -1,31 +1,25 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCanister } from "@connect2ic/react";
+import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  SelectValue,
-  SelectTrigger,
-  SelectItem,
-  SelectContent,
   Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
-import { toast } from "@/components/ui/use-toast";
 import { ChevronLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../../LoadingScreen";
-import * as vetkd from "ic-vetkd-utils";
-// Connect2ic: Import Connect2ic library to interact with the backend canister
-import { useCanister } from "@connect2ic/react";
-//
-import { useState } from "react";
 import OnboardingBanner from "../../OnboardingBanner";
+import * as vetkd from "ic-vetkd-utils";
 
 export default function RegisterPage1Content() {
-  // Connect2ic: Use the "lyfelynkMVP_backend" canister
+  const navigate = useNavigate();
 
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
-  //
-
-  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("");

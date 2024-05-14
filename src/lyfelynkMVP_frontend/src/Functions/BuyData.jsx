@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,31 +12,23 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { ShoppingCart } from "lucide-react";
-import { useState } from "react";
 import { useCanister } from "@connect2ic/react";
-export function BuyDataFunc({ listingID, seller }) {
-  const [open, setOpen] = useState(false); // Managing dialog's open state
 
+export function BuyDataFunc({ listingID, seller }) {
+  const [open, setOpen] = useState(false);
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
   const handleConfirmPurchase = async () => {
-    console.log(listingID);
-    console.log(seller);
     try {
-      const result = await lyfelynkMVP_backend.purchaseListing(
-        listingID,
-        seller
-      );
+      const result = await lyfelynkMVP_backend.purchaseListing(listingID, seller);
       if (result.ok) {
-        //alert("Purchase successful:", result.ok);
         toast({
           title: "Purchase successful",
           description: "Your purchase has been completed.",
           variant: "success",
         });
-        setOpen(false); //dialog closes
+        setOpen(false);
       } else {
-        //alert("Purchase failed:", result.err);
         toast({
           title: "Purchase Failed",
           description: `Error: ${result.err}`,
@@ -44,7 +36,6 @@ export function BuyDataFunc({ listingID, seller }) {
         });
       }
     } catch (error) {
-      //alert("Error purchasing listing:", error);
       toast({
         title: "Error",
         description: `An error occurred: ${error}`,
@@ -54,15 +45,9 @@ export function BuyDataFunc({ listingID, seller }) {
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          className="p-2 text-white"
-          onClick={() => setOpen(true)}
-        >
+        <Button className="p-2 text-white" onClick={() => setOpen(true)}>
           <ShoppingCart />
         </Button>
       </DialogTrigger>

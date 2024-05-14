@@ -1,13 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Heart, LayoutDashboard, Menu, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { ConnectButton, ConnectDialog } from "@connect2ic/react";
 import "../connect2ic/connect2ic.css";
+
 const Navbar = () => {
-  // State for menu visibility
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleMenuClick = () => {
@@ -15,7 +15,6 @@ const Navbar = () => {
   };
 
   const handleLinkClick = () => {
-    // Close the menu when a link is clicked
     setIsMenuOpen(false);
   };
 
@@ -44,109 +43,56 @@ const Navbar = () => {
           <ModeToggle />
         </div>
 
-        <div
-          className={`md:hidden fixed top-16 left-0 w-full bg-background border-b shadow-sm
-            ${isMenuOpen ? "block" : "hidden"}`}
-        >
+        <div className={`md:hidden fixed top-16 left-0 w-full bg-background border-b shadow-sm ${isMenuOpen ? "block" : "hidden"}`}>
           <div className="flex flex-col justify-center items-center h-full">
-            <NavLink
-              onClick={handleLinkClick}
-              style={({ isActive }) => {
-                return isActive ? { color: "blue" } : {};
-              }}
-              to="/Health-User/Home"
-              className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-            >
-              <LayoutDashboard className="inline-block h-6 w-6 mr-2" />
-              Dashboard
-            </NavLink>
-            <NavLink
-              onClick={handleLinkClick}
-              style={({ isActive }) => {
-                return isActive ? { color: "blue" } : {};
-              }}
-              to="/Health-User/MyHealth"
-              className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-            >
-              <Heart className="inline-block h-6 w-6 mr-2" />
-              My Health
-            </NavLink>
-            <NavLink
-              onClick={handleLinkClick}
-              style={({ isActive }) => {
-                return isActive ? { color: "blue" } : {};
-              }}
-              to="/Health-User/Marketplace"
-              className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-            >
-              <ShoppingCart className="inline-block h-6 w-6 mr-2" />
-              Marketplace
-            </NavLink>
-            <NavLink
-              onClick={handleLinkClick}
-              style={({ isActive }) => {
-                return isActive ? { color: "blue" } : {};
-              }}
-              to="/Health-User/Profile"
-              className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-            >
-              <User className="inline-block h-6 w-6 mr-2" />
-              Profile
-            </NavLink>
+            {[
+              { to: "/Health-User/Home", icon: <LayoutDashboard />, text: "Dashboard" },
+              { to: "/Health-User/MyHealth", icon: <Heart />, text: "My Health" },
+              { to: "/Health-User/Marketplace", icon: <ShoppingCart />, text: "Marketplace" },
+              { to: "/Health-User/Profile", icon: <User />, text: "Profile" }
+            ].map((link, index) => (
+              <NavLink
+                key={index}
+                onClick={handleLinkClick}
+                style={({ isActive }) => ({
+                  color: isActive ? "blue" : "inherit"
+                })}
+                to={link.to}
+                className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
+              >
+                {link.icon}
+                {link.text}
+              </NavLink>
+            ))}
           </div>
         </div>
 
         <div className="hidden md:flex items-center space-x-12">
-          <NavLink
-            onClick={handleLinkClick}
-            style={({ isActive }) => {
-              return isActive ? { color: "blue" } : {};
-            }}
-            to="/Health-User/Home"
-            className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-          >
-            <LayoutDashboard className="inline-block h-6 w-6 mr-2" />
-            Dashboard
-          </NavLink>
-          <NavLink
-            onClick={handleLinkClick}
-            style={({ isActive }) => {
-              return isActive ? { color: "blue" } : {};
-            }}
-            to="/Health-User/MyHealth"
-            className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-          >
-            <Heart className="inline-block h-6 w-6 mr-2" />
-            My Health
-          </NavLink>
-          <NavLink
-            onClick={handleLinkClick}
-            style={({ isActive }) => {
-              return isActive ? { color: "blue" } : {};
-            }}
-            to="/Health-User/Marketplace"
-            className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-          >
-            <ShoppingCart className="inline-block h-6 w-6 mr-2" />
-            Marketplace
-          </NavLink>
-          <NavLink
-            onClick={handleLinkClick}
-            style={({ isActive }) => {
-              return isActive ? { color: "blue" } : {};
-            }}
-            to="/Health-User/Profile"
-            className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
-          >
-            <User className="inline-block h-6 w-6 mr-2" />
-            Profile
-          </NavLink>
+          {[
+            { to: "/Health-User/Home", icon: <LayoutDashboard />, text: "Dashboard" },
+            { to: "/Health-User/MyHealth", icon: <Heart />, text: "My Health" },
+            { to: "/Health-User/Marketplace", icon: <ShoppingCart />, text: "Marketplace" },
+            { to: "/Health-User/Profile", icon: <User />, text: "Profile" }
+          ].map((link, index) => (
+            <NavLink
+              key={index}
+              onClick={handleLinkClick}
+              style={({ isActive }) => ({
+                color: isActive ? "blue" : "inherit"
+              })}
+              to={link.to}
+              className="text-foreground hover:text-primary my-2 text-xl font-bold flex items-center"
+            >
+              {link.icon}
+              {link.text}
+            </NavLink>
+          ))}
         </div>
 
         <div className="flex items-center">
           <Avatar className="mx-4">
             <AvatarImage
-              alt="John Lenon"
+              alt="John Lennon"
               src="/placeholder.svg?height=32&width=32"
             />
             <AvatarFallback>JL</AvatarFallback>

@@ -11,11 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { CircleX } from "lucide-react";
-import { useCanister } from "@connect2ic/react";
-import LoadingScreen from "../LoadingScreen";
 import { toast } from "@/components/ui/use-toast";
-
+import { CircleX } from "lucide-react";
+import LoadingScreen from "../LoadingScreen";
+import { useCanister } from "@connect2ic/react";
 import * as vetkd from "ic-vetkd-utils";
 
 const FileUpload = () => {

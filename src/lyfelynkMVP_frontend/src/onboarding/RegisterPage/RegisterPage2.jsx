@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,19 +11,14 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-// Connect2ic: Import Connect2ic library to interact with the backend canister
-import { useCanister } from "@connect2ic/react";
-//
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useCanister } from "@connect2ic/react"; // Connect2ic library to interact with the backend canister
 import LoadingScreen from "../../LoadingScreen";
 import OnboardingBanner from "../../OnboardingBanner";
 import * as vetkd from "ic-vetkd-utils";
 
 export default function RegisterPage2Content() {
+  // State variables
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
-  //
-
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useCanister } from "@connect2ic/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,7 @@ import { toast } from "@/components/ui/use-toast";
 
 export function ShareDataFunc({ assetID }) {
   const [userId, setUserId] = useState("");
-  const [open, setOpen] = useState(false); // Managing dialog's open state
+  const [open, setOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
 
@@ -26,16 +26,14 @@ export function ShareDataFunc({ assetID }) {
       setSharing(true);
       const result = await lyfelynkMVP_backend.grantDataAccess(userId, assetID);
       if (result.ok) {
-        //alert("Access granted successfully");
         toast({
           title: "Access Granted!",
           description: "User has been granted access to the data.",
           variant: "success",
         });
         setSharing(false);
-        setOpen(false); //dialog closes
+        setOpen(false);
       } else {
-        //alert("Error granting access: " + result.err);
         setSharing(false);
         toast({
           title: "Error Granting Access",
@@ -49,10 +47,7 @@ export function ShareDataFunc({ assetID }) {
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -66,18 +61,12 @@ export function ShareDataFunc({ assetID }) {
         <DialogHeader>
           <DialogTitle>Share your data</DialogTitle>
           <DialogDescription>
-            Enter the user ID you want to share your data with. Click share when
-            you're done.
+            Enter the user ID you want to share your data with. Click share when you're done.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label
-              htmlFor="userId"
-              className="text-right"
-            >
-              User ID
-            </Label>
+            <Label htmlFor="userId" className="text-right">User ID</Label>
             <Input
               id="userId"
               value={userId}
@@ -87,12 +76,7 @@ export function ShareDataFunc({ assetID }) {
           </div>
         </div>
         <DialogFooter>
-          <Button
-            onClick={handleShare}
-            disabled={sharing}
-          >
-            Send
-          </Button>
+          <Button onClick={handleShare} disabled={sharing}>Send</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

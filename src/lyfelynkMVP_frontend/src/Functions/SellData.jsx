@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useCanister } from "@connect2ic/react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
+import { useCanister } from "@connect2ic/react";
 
 export function SellDataFunc({ assetID }) {
   const [title, setTitle] = useState("");
