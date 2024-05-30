@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import LoadingScreen from "../../LoadingScreen";
 import * as vetkd from "ic-vetkd-utils";
 import { toast } from "@/components/ui/use-toast";
+
 export default function ProfileContent() {
   const [lyfelynkMVP_backend] = useCanister("lyfelynkMVP_backend");
   const [userData, setUserData] = useState(null);
@@ -27,6 +28,7 @@ export default function ProfileContent() {
   const [heartRate, setHeartRate] = useState("");
   const [pincode, setPincode] = useState("");
   const [loading, setLoading] = useState(false);
+
   const aes_gcm_encrypt = async (data, rawKey) => {
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
     const aes_key = await window.crypto.subtle.importKey(

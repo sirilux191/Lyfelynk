@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Papa from "papaparse";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -66,12 +68,12 @@ const FileUpload = () => {
   };
 
   const validateFile = (file) => {
-    const supportedFormats = ["pdf", "csv", "xml", "jpg", "jpeg"];
+    const supportedFormats = ["pdf", "csv", "xml", "jpg", "jpeg", "png"];
     const fileType = file.type.split("/")[1];
     const fileSizeMB = file.size / (1024 * 1024);
     if (!supportedFormats.includes(fileType)) {
       setErrorMessage(
-        "Unsupported file format. Please select a file with one of the supported formats: PDF, CSV, XML, JPG, JPEG."
+        "Unsupported file format. Please select a file with one of the supported formats: PDF, CSV, XML, JPG, JPEG, PNG."
       );
       return false;
     }
@@ -307,6 +309,19 @@ const FileUpload = () => {
     }
   };
 
+  const convertCsvToPdf = () => {
+    const doc = new jsPDF();
+    const fileName = `${file.file.name.split(".")[0]}_analyzed.pdf`; // Generate file name based on the original file name
+
+    doc.autoTable({
+      head: [Object.keys(csvData[0])],
+      body: csvData.slice(1),
+    });
+
+    // Save the PDF file
+    doc.save(fileName);
+  };
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -418,6 +433,15 @@ const FileUpload = () => {
       )}
 
       {csvData && (
+        <Button
+          onClick={convertCsvToPdf}
+          className="my-2 mr-2"
+        >
+          Download Analyzed File
+        </Button>
+      )}
+
+      {csvData && (
         <div className="overflow-x-auto bg-muted rounded-lg p-2 ">
           <table>
             <tbody>
@@ -441,7 +465,7 @@ const CloudFunctionCallButton = ({ handleCallCloudFunction }) => (
     variant="outline"
     onClick={handleCallCloudFunction}
   >
-    Display File
+    Run Analytics
   </Button>
 );
 

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { ChevronLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCanister } from "@connect2ic/react"; // Connect2ic library to interact with the backend canister
 import LoadingScreen from "../../LoadingScreen";
 import OnboardingBanner from "../../OnboardingBanner";

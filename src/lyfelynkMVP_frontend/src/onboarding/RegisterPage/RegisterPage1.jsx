@@ -14,6 +14,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import LoadingScreen from "../../LoadingScreen";
 import OnboardingBanner from "../../OnboardingBanner";
+
 import * as vetkd from "ic-vetkd-utils";
 
 export default function RegisterPage1Content() {
