@@ -2,13 +2,14 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './Navbar';
 import DashboardContent from './Pages/Dashboard';
-import MyHealthContent from './Pages/MyHealth';
+import MyHealthContent from './Pages/Records';
 import MarketplaceContent from './Pages/Marketplace';
 import ProfileContent from './Pages/Profile';
 import ShareContent from './sub/SharePage';
 import UploadContent from './sub/UploadPage';
 import NotFoundPage from './NotFoundPage';
 import AppBanner from '../AppBanner';
+import AnalyticsContent from './Pages/Analytics';
 
 export default function AppRoute1() {
   return (
@@ -20,11 +21,12 @@ export default function AppRoute1() {
       </div>
       <Routes>
         <Route path="/Home" element={<DashboardContent/>} />
-        <Route path="/MyHealth" element={<MyHealthContent/>} />
-        <Route path="/MyHealth">
-          <Route path="/MyHealth/Share" element={<ShareContent/>} />
-          <Route path="/MyHealth/Upload" element={<UploadContent/>} />
+        <Route path="/Records" element={<MyHealthContent/>} />
+        <Route path="/Records">
+          <Route path="/Records/Share" element={<ShareContent/>} />
+          <Route path="/Records/Upload" element={<UploadContent/>} />
         </Route>
+        <Route path="/Analytics" element={<AnalyticsContent/>} />
         <Route path="/Marketplace" element={<MarketplaceContent/>} />
         <Route path="/Profile" element={<ProfileContent/>} />
 

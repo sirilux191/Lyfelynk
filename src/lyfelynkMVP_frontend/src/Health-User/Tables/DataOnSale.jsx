@@ -109,23 +109,20 @@ function DataOnSaleTable() {
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter names..."
+          placeholder="Filter titles..."
           value={
-            (table.getColumn("name") &&
-              table.getColumn("name").getFilterValue()) ||
+            (table.getColumn("title") &&
+              table.getColumn("title").getFilterValue()) ||
             ""
           }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("title")?.setFilterValue(event.target.value)
           }
           className="w-full mr-2"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="ml-auto"
-            >
+            <Button variant="outline" className="ml-auto">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -189,10 +186,7 @@ function DataOnSaleTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
